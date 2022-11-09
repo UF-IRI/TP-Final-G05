@@ -4,6 +4,10 @@
 #include <fstream>
 
 using namespace std;
+enum obraSocial
+{
+	medicus = 1, OSDE, IOSFA, italiano, aleman, espanyol
+};
 
 struct fecha
 {
@@ -13,19 +17,28 @@ struct fecha
 struct contacto
 {
 	unsigned int DNI;
-	string city;
-	string state;
+	string direccion;
 	string email;
-	string phone; //(+54)911-4444-5678
-	string postalCode;
+	string telefono; //(+54)911-4444-5678
+	string celular;
 };
 
 struct consulta
 {
 	unsigned int DNI;
 	fecha ultConsulta;
-	string ensurance1, ensurance2;
+	fecha turnoSolicitado;
+	string ensurance1, ensurance2; // por las dudas
+	string matriculaMed;
 	bool attendance;
+};
+struct medico
+{
+	string matriculaMed;
+	string firstName, lastNmae;
+	string telefono;
+	string especialidad;
+	bool activo;
 };
 
 struct paciente
@@ -33,9 +46,9 @@ struct paciente
 	unsigned int DNI;
 	string firstName, lastName;
 	char gender; //F for female M for male
-	unsigned int BirthD, BirthM, BirthY; //archivo pac tiene formato MM/DD/AA
+	fecha birthDate; //archivo pac tiene formato MM/DD/AA
 	string VitalState; //n/c - internado - fallecido
-	string enssurance;
+	int ensurance;
 	contacto Cont;//variable contacto de tipo contacto
 	consulta Cons; //variable consulta de tipo consulta
 }; typedef Pac;
@@ -162,6 +175,20 @@ bool EscrituraCsv(string NombreArchi, Pac* l_Pacientes, contacto* l_Contactos, c
 		return false;
 
 	OutDataFP >> dummy >> coma >> dummy >> coma >> dummy;
-
-	
+}
+bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* N, int DNI)
+//N es variable entera que viene por funcion como parametro formal
+{
+	int num = 0;
+	int i;//variable para recibir éxito o defecto de funciones de archivos
+	//implementamos utilización LIBRERIA CTIME entonces transformamos variables segundos con time_t.
+	unsigned int diezañosEnSeg;
+	unsigned int FechaHoy;
+	l_Pacientes = new Pac[*N];
+	for (i = 0; i < *N; i++)
+	{
+		if (l_Pacientes.)
+		{
+		}
+	}
 }
