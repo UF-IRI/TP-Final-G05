@@ -5,6 +5,9 @@
 
 using namespace std;
 
+enum obraSocial {
+
+};
 struct fecha
 {
 	unsigned int dia, mes, anio;
@@ -153,15 +156,21 @@ bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual)
 	return true;
 }
 
-bool EscrituraCsv(string NombreArchi, Pac* l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int *tamactual)
+bool EscrituraCsv(string NombreArchi, Pac *& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int *tamactual)
 {
+	Pac* aux = new Pac * [*tamactual];
+	
 	fstream OutDataFP;
-	OutDataFP.open(NombreArchi, ios::in);
+	OutDataFP.open(NombreArchi, ios::out);
 
 	if (!(OutDataFP.is_open()))
 		return false;
 
-	OutDataFP >> dummy >> coma >> dummy >> coma >> dummy;
+	char coma;
+
+	OutDataFP.close();
+
+	return;
 
 	
 }
