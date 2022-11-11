@@ -1,10 +1,15 @@
 #include "iri.cpp"
 #include <iostream>
+#include <string>
+
+using namespace std;
 
 int main() {
 
-    std::cout << "Hello World TP_Final";
+    string arr;
 
-
-    return EXIT_SUCCESS;
+    cout << "ingrese:";
+    cin >> arr;
+    cout << "es." << arr;
+    
 }

@@ -4,19 +4,16 @@
 #include <fstream>
 
 using namespace std;
+
 enum obraSocial
 {
 	medicus = 1, OSDE, IOSFA, italiano, aleman, espanyol
 };
 
-enum obraSocial {
-
-};
 struct fecha
 {
 	unsigned int dia, mes, anio;
 };
-
 struct contacto
 {
 	unsigned int DNI;
@@ -25,7 +22,6 @@ struct contacto
 	string telefono; //(+54)911-4444-5678
 	string celular;
 };
-
 struct consulta
 {
 	unsigned int DNI;
@@ -43,7 +39,6 @@ struct medico
 	string especialidad;
 	bool activo;
 };
-
 struct paciente
 {
 	unsigned int DNI;
@@ -56,15 +51,11 @@ struct paciente
 	consulta Cons; //variable consulta de tipo consulta
 }; typedef Pac;
 
-//struct contacto l_Contactos;
-//struct consulta l_Consultas;
-//struct paciente l_Pacientes;
-
 //invocacion funciones
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA);
 bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
-bool EscrituraCsv(string NombreArchi, Pac* l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual);
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual);
 
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 {
@@ -78,14 +69,14 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
 		return nullptr;
 
-	Pac l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
+	Pac *l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
 	Pac aux1;
 	consulta aux2;
 	contacto aux3;
 	// nota naux;//a q equivale en nuestro cod
 	string dummy;
 	char coma;
-	unsigned int dniaux;
+	unsigned int dniaux = 0;
 	int tamact = 0;
 
 	//leo headers todos archivos (3) - no se leen los ENDL cuando leyendo headers
@@ -97,7 +88,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 	while (fp)
 	{
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
-			aux1.BirthD >> coma >> aux1.BirthM >> coma >> aux1.BirthY >> coma >> aux1.VitalState >> coma >> aux1.state >> endl;
+			aux1.BirthD >> coma >> aux1.BirthM >> coma >> aux1.BirthY >> coma >> aux1.VitalState;
 		//recorre, lee archivo paciente y guarda en struct paciente
 		while ((dniaux == aux1.DNI) || fp2) {
 			fp2 >> dniaux >> coma; //cambiar todos headers de----------------------------------------------
@@ -118,7 +109,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 		fp3.seekg(fp3.beg);
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
-		agregar(l_Pacientes, aux1, &tamact);
+		agregar(*l_Pacientes, aux1, &tamact);
 	}
 
 	fp.close();
@@ -178,22 +169,23 @@ bool EscrituraCsv(string NombreArchi, Pac *& l_Pacientes, contacto* l_Contactos,
 
 	if (!(OutDataFP.is_open()))
 		return false;
-
-	OutDataFP >> dummy >> coma >> dummy >> coma >> dummy;
 }
-bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* N, int DNI)
+bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual, int DNI)
 //N es variable entera que viene por funcion como parametro formal
 {
-	int num = 0;
-	int i;//variable para recibir éxito o defecto de funciones de archivos
+	Pac aux;
+	int num = 0; //variable para recibir éxito o defecto de funciones de archivos
+	int i;
 	//implementamos utilización LIBRERIA CTIME entonces transformamos variables segundos con time_t.
-	unsigned int diezañosEnSeg;
-	unsigned int FechaHoy;
-	l_Pacientes = new Pac[*N];
-	for (i = 0; i < *N; i++)
+	unsigned int diezañosEnSeg = 0;
+	unsigned int FechaHoy = 0;
+	l_Pacientes = new Pac[*tamactual];//?
+	for (i = 0; i < *tamactual; i++)
 	{
-		if (l_Pacientes.)
+		if (aux.VitalState == "n/c")
 		{
+
 		}
 	}
+	
 }
