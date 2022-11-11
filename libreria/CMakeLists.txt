@@ -1,6 +1,6 @@
 ## >>>>>>>>>>>>>>>
 ## >>>>>>>>>>>>>>>
-add_library(libreria MiLibreria.cpp)
+add_library(libreria MiLibreria.cpp "mate.cpp" "nica.cpp")
 ## <<<<<<<<<<<<<<<
 ## <<<<<<<<<<<<<<<
 
