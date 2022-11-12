@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <ctime>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ struct fecha
 {
 	unsigned int dia, mes, anio;
 };
+
 struct contacto
 {
 	unsigned int DNI;
@@ -22,6 +24,7 @@ struct contacto
 	string telefono; //(+54)911-4444-5678
 	string celular;
 };
+
 struct consulta
 {
 	unsigned int DNI;
@@ -31,6 +34,7 @@ struct consulta
 	string matriculaMed;
 	bool attendance;
 };
+
 struct medico
 {
 	string matriculaMed;
@@ -39,6 +43,7 @@ struct medico
 	string especialidad;
 	bool activo;
 };
+
 struct paciente
 {
 	unsigned int DNI;
@@ -56,7 +61,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA);
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual);
 bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
-
+Secretaría(Pac*&l_Pacientes, int *tamactual,unsigned int DNI);
 
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 {
@@ -172,22 +177,108 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, contacto* l_Contactos, 
 	if (!(OutDataFP.is_open()))
 		return false;
 }
+
+Secretaría(Pac*& PacAux, int* tamactual, unsigned int DNI)
+{
+
+}
+
 bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual, int DNI)
 //N es variable entera que viene por funcion como parametro formal
 {
-	Pac aux;
 	int num = 0; //variable para recibir éxito o defecto de funciones de archivos
 	int i;
+
+	bool check = true;
+	Pac AuxErroneos; //ENVEZ = implementar funcion AGREGAR
+
 	//implementamos utilización LIBRERIA CTIME entonces transformamos variables segundos con time_t.
-	unsigned int diezañosEnSeg = 0;
-	unsigned int FechaHoy = 0;
-	l_Pacientes = new Pac[*tamactual];//?
+	time_t now;
+	time_t timer;
+	struct tm TenyAgo = { 0 };
+	double seconds;
+	time(&now);
+
+	TenyAgo.tm_hour = 0;   TenyAgo.tm_min = 0; TenyAgo.tm_sec = 0;
+	TenyAgo.tm_year = TenyAgo.tm_year - 10; TenyAgo.tm_mon = 0; TenyAgo.tm_mday = 1;
+
+	time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+	seconds = difftime(now, mktime(&TenyAgo));
+
+
+	Pac *PacAux = new Pac[*tamactual];//?
+	PacAux = l_Pacientes;
 	for (i = 0; i < *tamactual; i++)
 	{
-		if (aux.VitalState == "n/c")
-		{
-
+		//pacientes fallecidos
+		if ((PacAux[i].VitalState == "fallecido") && (PacAux[i].DNI == DNI))
+		{//mismo proceso pero en diferente archivo: "Dead.csv"
+			//a fx escritura le llega por nombre tipo string (dead.csv) y la fx tiene q aplicar a q escriba en ese archivo correctly
+			//(l_Pacientes.VitalState == "fallecido") || (l_Pacientes.VitalState == "Fallecido")
+			// O CONTROLAR con TLOWER en ingreso de data
+			check = fxEscrituraCsv("Fallecidos.csv", PacAux, int* tamactual);
+			if (check == true)
+				i++;
+			else
+				AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores
+			break; //ya terminó con este paciente[i]
 		}
-	}
+		else
+			if ((PacAux[i].VitalState == "internado") && (PacAux[i].DNI == DNI))
+			{//(l_Pacientes.VitalState == "internado") || (l_Pacientes.VitalState == "Internado")
+				// O CONTROLAR con TLOWER en ingreso de data
+				check = fxEscrituraCsv("Archivados.csv", PacAux, int* tamactual);
+				if (check == true)
+					i++;
+				else
+					AuxErroneos[i].DNI = PacAux.DNI[i];//muevo dni del paciente a lista para re-visar los errores de escritura
+				break; //ya terminó con este paciente[i]
+			}
+			else
 
+				//posibles recuperables
+				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == DNI)) //Paciente desconocida vitalidad = potrencial recuperable
+				{
+					//NO TIENE SENTIDO ALGUNO MANEJAR DATA, si NO SABES SI VIVEN
+					if ((PacAux[i].Cons + 10añosEnSeg < now) && (PacAux[i].DNI == DNI))
+					{
+						check = fxEscrituraCsv("Archivados.csv", PacAux, int* tamactual);
+						if (check == true)
+							i++;
+						else
+							AuxErroneos[i].DNI = PacAux.DNI[i];//muevo dni del paciente a lista para re-visar los errores de escritura
+						break; //ya terminó con este paciente[i]
+					}
+				}
+				else
+					if (PacAux[i].attendance == true)
+					{		//lama a fxEscritura y escribe en archivo RECUPERABLES
+							//archivo recuperables ya existe (caso contrario, lo crea)
+						check = fxEscrituraCsv("Recuperables.csv", PacAux, int* tamactual);
+						if (check == true)
+						{	//llama funcion secretaria en donde la secretaria contacta al paciente 
+							//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
+							check = Secretaría(PacAux, tamactual, DNI);
+							if (check == true)
+								i++;
+							else
+								AuxErroneos[i].DNI = PacAux.DNI[i];//muevo dni del paciente a lista para re-visar los errores de escritura
+							break; //ya terminó con este paciente[i]
+							/*en la cual el desarrollo incluiría :
+							* decisión: retorno/no retorna
+							* posible fallo: paciente no responde solucion:volver a contactar en tiempo
+							* posible cambio obra social. caso positivo/negativo: informa y actualiza
+							* OBRA SOCIAL 2 DEBERÍA ESTAR EN BLANK
+							* genera y escribe archivos pertinentes
+							* envia
+							* IGUALAR fxSecretaria a variable NUM
+							* si num == 1, proceso exitoso, si num==0, error
+							*/
+						}
+						else
+							AuxErroneos[i].DNI = PacAux.DNI[i];//muevo dni del paciente a lista para re-visar los errores de escritura
+						break; //ya terminó con este paciente[i]
+					}
+	}
 }
