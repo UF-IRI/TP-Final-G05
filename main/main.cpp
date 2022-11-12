@@ -6,10 +6,8 @@ using namespace std;
 
 int main() {
 
-    string arr;
+    std::cout << "Hello World TP_Final";
 
-    cout << "ingrese:";
-    cin >> arr;
-    cout << "es." << arr;
-    
+
+    return EXIT_SUCCESS;
 }
