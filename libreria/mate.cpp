@@ -146,31 +146,30 @@ bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar) {
 	return true;
 }
 
-bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual)
+bool agregar(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 {
 	if (!(l_Pacientes == nullptr) || (tamactual == nullptr))
 		return false;
 
 	*tamactual = *tamactual + 1;
 	int i = 0;
-	Pac* aux = new Pac[*tamactual];
+	Pac* NewListPac = new Pac[*tamactual];
 	while (i < *tamactual - 1 && *tamactual - 1 != 0) {
-		aux[i] = l_Pacientes[i];
+		NewListPac[i] = l_Pacientes[i];
 		i++;
 	}
-	aux[i] = paciente;
+	NewListPac[i] = aux1;
 
 	delete[] l_Pacientes;
-	l_Pacientes = aux;
+	l_Pacientes = NewListPac;
 
 	return true;
 }
 
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)	
 {
-	if (l_Pacientes == nullptr)
+	if (l_Pacientes == nullptr || tamactual == nullptr)
 		return false;
-	Pac* aux = new Pac * [*tamactual];
 
 	fstream OutDataFP;
 	OutDataFP.open(NombreArchi, ios::out);
@@ -178,7 +177,31 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	if (!(OutDataFP.is_open()))
 		return false;
 
+	int i = 0;
+
+	//escribe headers
+	OutDataFP << "DNI" << COMA << "NOMBRE" << COMA << "APELLIDO" << COMA << "GENERO" << COMA << "FECHA" << COMA << "ESTADO VITAL" << COMA << "OBRA SOCIAL";
+	OutDataFP << COMA << "DIRECCION" << COMA << "EMAIL" << COMA << "TELEFONO" << COMA << "CELULAR";
+	OutDataFP << COMA << "ULTIMA CONSULTA" << COMA << "TURNO SOLICITADO" << COMA << "OBRA SOCIAL 1" << COMA << "OBRA SOCIAL2" << COMA << "PRESENTISMO" << endl;
+	
+	while (i < *tamactual)
+	{
+		OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender << "," <<
+			l_Pacientes[i].birthDate.dia << "/" << l_Pacientes[i].birthDate.mes << "/" << l_Pacientes[i].birthDate.anyo << "," <<
+			l_Pacientes[i].VitalState << "," << l_Pacientes[i].ensurance << endl;
+		OutDataFP << "," << l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << l_Pacientes[i].Cont.telefono << "," <<
+			l_Pacientes[i].Cont.celular << "," << endl;
+		OutDataFP << l_Pacientes[i].Cons.ultConsulta.dia << "/" << l_Pacientes[i].Cons.ultConsulta.mes << "/" << l_Pacientes[i].Cons.ultConsulta.anyo 
+			<< "/" << l_Pacientes[i].Cons.turnoSolicitado.dia << "/" << l_Pacientes[i].Cons.turnoSolicitado.mes 
+			<< "/" << l_Pacientes[i].Cons.turnoSolicitado.anyo << "," << l_Pacientes[i].Cons.ensurance1 << "," << l_Pacientes[i].Cons.ensurance2
+			<< "," << l_Pacientes[i].Cons.matriculaMed << "," << l_Pacientes[i].Cons.attendance << endl;
+		i++;
+	}
+	
+	return true;
+	
 }
+
 
 bool Secretaría(Pac*& PacAux, int* tamactual, unsigned int DNI)
 {
@@ -192,7 +215,7 @@ bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, i
 	int i;
 
 	bool check = true;
-	Pac AuxErroneos; //ENVEZ = implementar funcion AGREGAR
+	Pac *AuxErroneos; //ENVEZ = implementar funcion AGREGAR
 
 	//implementamos utilización LIBRERIA CTIME entonces transformamos variables segundos con time_t.
 	time_t now;
