@@ -54,7 +54,7 @@ struct paciente
 	int ensurance;
 	contacto Cont;//variable contacto de tipo contacto
 	consulta Cons; //variable consulta de tipo consulta
-}; typedef Pac;
+}; typedef struct paciente Pac;
 
 //invocacion funciones
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA);
@@ -75,14 +75,13 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int DNI)
 	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
 		return nullptr;
 
-	Pac l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
+	Pac *l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
 	Pac aux1;
 	consulta aux2;
 	contacto aux3;
 	// nota naux;//a q equivale en nuestro cod
 	string dummy;
 	char coma;
-	unsigned int dniaux = 0;
 	int tamact = 0;
 
 	//leo headers todos archivos (3) - no se leen los ENDL cuando leyendo headers
@@ -96,19 +95,19 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int DNI)
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
 			aux1.BirthD >> coma >> aux1.BirthM >> coma >> aux1.BirthY >> coma >> aux1.VitalState;
 		//recorre, lee archivo paciente y guarda en struct paciente
-		while ((dniaux == aux1.DNI) || fp2) {
-			fp2 >> dniaux >> coma; //cambiar todos headers de----------------------------------------------
-			if (dniaux == aux2.DNI) {
-				l_Pacientes.Cons = aux2;
-				break;
+		while ((DNI == aux1.DNI) || fp2) {
+			fp2 >> DNI >> coma; //cambiar todos headers de----------------------------------------------
+			if (DNI == aux2.DNI) {
+				l_Pacientes->Cons = aux2;
+				break; //no necesario? condicion while
 			}
 		}
-		while ((dniaux == aux3.DNI) || fp3)
+		while ((DNI == aux3.DNI) || fp3)
 		{
-			fp3 >> dniaux >> coma; //cambiar todos headers de------------------------------------------------
+			fp3 >> DNI >> coma; //cambiar todos headers de------------------------------------------------
 			if (dniaux == aux3.DNI) {
-				l_Pacientes.Cont = aux3;
-				break;
+				l_Pacientes->Cont = aux3;
+				break; //no necesario? condicion while
 			}
 		}
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio

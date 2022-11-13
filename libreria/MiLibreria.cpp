@@ -49,7 +49,7 @@ struct paciente
 	int ensurance;
 	contacto Cont;//variable contacto de tipo contacto
 	consulta Cons; //variable consulta de tipo consulta
-}; typedef Pac;
+}; typedef struct paciente Pac;
 
 //invocacion funciones
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA);
@@ -70,7 +70,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
 		return nullptr;
 
-	Pac l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
+	Pac *l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
 	Pac aux1;
 	consulta aux2;
 	contacto aux3;
@@ -95,7 +95,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA)
 			fp2 >> dniaux >> coma; //cambiar todos headers de----------------------------------------------
 			if (dniaux == aux2.DNI) {
 				l_Pacientes.Cons = aux2;
-				break;
+				break; //necesario? en condicion ya lo señala
 			}
 		}
 		while ((dniaux == aux3.DNI) || fp3)
