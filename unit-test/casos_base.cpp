@@ -10,17 +10,18 @@ namespace Casos_Base::tests
 		string PacientesA = "hola.?";
 		string ConsultasA = "<210ds´+";
 		string ContactosA = "sidndan";
-		
+		string MedA = "sidndan";
 		int DNI = 45296137;
 
 		//Act
 		bool result = true;
-		result = ProtoLectura(PacientesA, ConsultasA, ContactosA, DNI);
+		result = ProtoLectura(PacientesA, ConsultasA, ContactosA, MedA, DNI);
 
 		//Assert
-		EXPECT_EQ(ProtoLectura("hola.?", "<210ds´+", "sidndan", 45296137), result);
+		EXPECT_EQ(ProtoLectura("hola.?", "<210ds", "sidndan","sidndan", 45296137), result);
 	}
 
+	//incorrecta
 	TEST(LecturaCsv, lecturaINCorrecta)
 	{
 		//AAA --> Arrange-Act-Assert
@@ -29,8 +30,22 @@ namespace Casos_Base::tests
 		string ConsultasA = "/0" ;
 		string ContactosA;
 	}
-	TEST(Casos_Base, Test_Caso2) {
-		ASSERT_THAT(1, 1);
+
+	//AGREGAR
+	TEST(agregar, correcto) 
+	{
+		//AAA --> Arrange-Act-Assert
+		//Arrange
+
+		Pac* lista = nullptr;
+		Pac lista2 = {};
+		int* N = 0;
+
+		//Act
+		bool expected = false; //alguna lista es nula= correcto
+		bool actual= agregarPac(lista, lista2, N);
+
+		EXPECT_EQ(expected, actual);
 	}
 
 	TEST(Casos_Base, Test_Caso3) {

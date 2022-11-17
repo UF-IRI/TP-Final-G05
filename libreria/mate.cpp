@@ -25,16 +25,6 @@ struct contacto
 	string celular;
 }; typedef struct contacto Cont;
 
-struct consulta
-{
-	unsigned int DNI;
-	fecha ultConsulta;
-	fecha turnoSolicitado;
-	string ensurance1, ensurance2; // por las dudas
-	string matriculaMed;
-	bool attendance;
-}; typedef struct consulta Cons;
-
 struct medico
 {
 	string matriculaMed;
@@ -43,6 +33,19 @@ struct medico
 	string especialidad;
 	bool activo;
 }; typedef struct medico Med;
+
+struct consulta
+{
+	unsigned int DNI;
+	fecha ultConsulta; //DD/MM/AA
+	fecha turnoSolicitado; //DD/MM/AA
+	string ensurance1, ensurance2; // por las dudas
+	string matriculaMed;
+	int attendance; //0 for True 1 for False
+	Med MedInCharge;
+	Cont Contacto;
+
+}; typedef struct consulta Cons;
 
 struct paciente
 {
@@ -57,22 +60,25 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni);
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA, int dni);
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
 bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
 bool Secretaría(Pac*& l_Pacientes, int* tamactual, unsigned int dni);
 
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni)
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA int dni)
 {
 	fstream fp;
 	fstream fp2;
 	fstream fp3;
+	fstream fp4;
 	fp.open(PacientesA, ios::in);
 	fp2.open(ConsultasA, ios::in);
 	fp3.open(ContactoA, ios::in);
 
-	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
+	fp4.open(MedA, ios::in);
+
+	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open()) && (fp4.is_open())))
 		return nullptr;
 
 	Pac* l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
@@ -95,27 +101,25 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni)
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
 			aux1.birthDate.dia >> coma >> aux1.birthDate.mes >> coma >> aux1.birthDate.anio >> coma >> aux1.VitalState;
 		//recorre, lee archivo paciente y guarda en struct paciente
-		while ((dni == aux1.DNI) || fp2) {
-			fp2 >> dni >> coma; //cambiar todos headers de----------------------------------------------
-			if (dni == aux2.DNI) {
-				l_Pacientes->Cons = aux2;
-				break; //no necesario? condicion while
-			}
+		while ((dni == aux1.DNI) || fp2) 
+		{
+			fp2 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			//copia la info leida del archivo en el apartado de la lista pacientes
+			l_Pacientes->Cons = aux2; 
+
 		}
 		while ((dni == aux3.DNI) || fp3)
 		{
 			fp3 >> dni >> coma; //cambiar todos headers de------------------------------------------------
-			if (dni == aux3.DNI) {
-				l_Pacientes->Cont = aux3;
-				break; //no necesario? condicion while
-			}
+			//copia la info leida del archivo en el apartado de la lista pacientes
+			l_Pacientes->Cont = aux3;
 		}
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
 		fp3.seekg(fp3.beg);
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
 		agregar(l_Pacientes, aux1, &tamact);
-		//srgun procedimiento l_pacientes deberia llevar una lista tipo pointer, pero al no permitirnos, lleva tipo struct
+		
 	}
 
 	fp.close();

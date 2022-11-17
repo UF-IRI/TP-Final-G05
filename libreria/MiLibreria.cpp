@@ -23,20 +23,9 @@ struct contacto
 	string direccion;
 	string email;
 	string telefono; //(+54)911-4444-5678
-	string celular;
+	string celular; //(+54)911-4444-5678
 
 }; typedef struct contacto Cont;
-
-struct consulta
-{
-	unsigned int DNI;
-	fecha ultConsulta;
-	fecha turnoSolicitado;
-	string ensurance1, ensurance2; // por las dudas
-	string matriculaMed;
-	bool attendance;
-
-}; typedef struct consulta Cons;	
 
 struct medico
 {
@@ -47,6 +36,18 @@ struct medico
 	bool activo;
 
 }; typedef struct medico Med;
+
+struct consulta
+{
+	unsigned int DNI;
+	fecha ultConsulta; //DD/MM/AA
+	fecha turnoSolicitado; //DD/MM/AA
+	string ensurance1, ensurance2; // por las dudas
+	string matriculaMed;
+	int attendance; //0 for True 1 for False
+	Med MedInCharge;
+
+}; typedef struct consulta Cons;	
 
 struct paciente
 {
@@ -62,68 +63,84 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni);
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
-bool agregar(Pac*& l_Pacientes, Pac paciente, int* tamactual);
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA,int dni);
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual);
+bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
+bool agregarCons(Cons*& l_Cons, Cons consulta, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
+bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni);
 bool Secretaría(Pac*& l_Pacientes, int* tamactual, unsigned int dni);
 //PROTOTIPOS
-bool ProtoLectura(string PacientesA, string ConsultasA, string ContactoA, int dni);
+bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni);
 int suma(int num, int num2);
 
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni)
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
 {
 	fstream fp;
 	fstream fp2;
 	fstream fp3;
+	fstream fp4;
 	fp.open(PacientesA, ios::in);
 	fp2.open(ConsultasA, ios::in);
-	fp3.open(ContactoA, ios::in);
+	fp3.open(ContactosA, ios::in);
+	fp4.open(MedA, ios::in);
 
-	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
+	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open()) && (fp4.is_open()) ))
 		return nullptr;
 
-	Pac* l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
+	Pac* l_Pacientes = new Pac[0];
+	Cons* l_Consultas = new Cons[0];
 	Pac aux1;
-	consulta aux2;
-	contacto aux3;
-	// nota naux;//a q equivale en nuestro cod
+	Cont aux2;
+	Cons aux3;
+	Med aux4;
+
 	string dummy;
 	char coma;
-	int tamact = 0;
+	int tamactual = 0;
 
 	//leo headers todos archivos (3) ARREGLAR- no se leen los ENDL cuando leyendo headers
 	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >>
 		dummy >> coma >> dummy >> coma >> dummy;
 	fp2 >> dummy >> coma >> dummy >> coma >> dummy;
 	fp3 >> dummy >> coma >> dummy >> coma >> dummy;
+	fp3 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
 
 	while (fp)
 	{
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
 			aux1.birthDate.dia >> coma >> aux1.birthDate.mes >> coma >> aux1.birthDate.anio >> coma >> aux1.VitalState;
 		//recorre, lee archivo paciente y guarda en struct paciente
-		while ((dni == aux1.DNI) || fp2) {
-			fp2 >> dni >> coma; //cambiar todos headers de----------------------------------------------
-			if (dni == aux2.DNI) {
-				l_Pacientes->Cons = aux2;
-				break; //no necesario? condicion while
-			}
+		while ((dni == aux1.DNI) || fp2) 
+		{
+			fp2 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			//copia la info leida del archivo en el apartado de la lista pacientes
+			l_Pacientes->Cont = aux2;
+			
 		}
 		while ((dni == aux3.DNI) || fp3)
 		{
 			fp3 >> dni >> coma; //cambiar todos headers de------------------------------------------------
-			if (dni == aux3.DNI) {
-				l_Pacientes->Cont = aux3;
-				break; //no necesario? condicion while
-			}
+			//copia la info leida del archivo en el apartado de la lista pacientes
+			l_Pacientes->Cons = aux3;
 		}
+		while (fp4)
+		{
+
+			fp4 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			if (aux3.matriculaMed == aux4.matriculaMed)
+				//copia la info leida del archivo en el apartado de la lista pacientes
+				l_Consultas->MedInCharge = aux4;
+		}
+
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
 		fp3.seekg(fp3.beg);
+		fp4.seekg(fp4.beg);
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
-		agregar(l_Pacientes, aux1, &tamact);
-		//srgun procedimiento l_pacientes deberia llevar una lista tipo pointer, pero al no permitirnos, lleva tipo struct
+		agregarPac(l_Pacientes, aux1, &tamactual);
+		agregarCons(l_Consultas, aux3, &tamactual);
+
 	}
 
 	fp.close();
@@ -134,26 +151,30 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, int dni)
 }
 
 //LECTURA PROTOTIPO UNITTEST
-bool ProtoLectura(string PacientesA, string ConsultasA, string ContactoA, int dni)
+bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
 {
 	fstream fp;
 	fstream fp2;
 	fstream fp3;
+	fstream fp4;
 	fp.open(PacientesA, ios::in);
 	fp2.open(ConsultasA, ios::in);
-	fp3.open(ContactoA, ios::in);
+	fp3.open(ContactosA, ios::in);
+	fp4.open(PacientesA, ios::in);
 
-	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open())))
+	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open()) && (fp4.is_open())))
 		return false;
 
-	Pac* l_Pacientes = new Pac[0]; //deberia ser tipo puntero, pero así, no me toma error
+	Pac* l_Pacientes = new Pac[0]; 
+	Cons* l_Consultas = new Cons[0];
 	Pac aux1;
-	consulta aux2;
-	contacto aux3;
-	// nota naux;//a q equivale en nuestro cod
+	Cont aux2;
+	Cons aux3;
+	Med aux4;
+	
 	string dummy;
 	char coma;
-	int tamact = 0;
+	int tamactual = 0;
 
 	//leo headers todos archivos (3) ARREGLAR- no se leen los ENDL cuando leyendo headers
 	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >>
@@ -169,7 +190,7 @@ bool ProtoLectura(string PacientesA, string ConsultasA, string ContactoA, int dn
 		while ((dni == aux1.DNI) || fp2) {
 			fp2 >> dni >> coma; //cambiar todos headers de----------------------------------------------
 			if (dni == aux2.DNI) {
-				l_Pacientes->Cons = aux2;
+				l_Pacientes->Cont = aux2;
 				break; //no necesario? condicion while
 			}
 		}
@@ -177,16 +198,27 @@ bool ProtoLectura(string PacientesA, string ConsultasA, string ContactoA, int dn
 		{
 			fp3 >> dni >> coma; //cambiar todos headers de------------------------------------------------
 			if (dni == aux3.DNI) {
-				l_Pacientes->Cont = aux3;
+				l_Pacientes->Cons = aux3;
 				break; //no necesario? condicion while
 			}
 		}
+		while (fp4)
+		{
+
+			fp4 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			if (aux3.matriculaMed == aux4.matriculaMed)
+				//copia la info leida del archivo en el apartado de la lista pacientes
+				l_Consultas->MedInCharge = aux4;
+		}
+
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
 		fp3.seekg(fp3.beg);
+		fp4.seekg(fp4.beg);
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
-		agregar(l_Pacientes, aux1, &tamact);
-		//srgun procedimiento l_pacientes deberia llevar una lista tipo pointer, pero al no permitirnos, lleva tipo struct
+		agregarPac(l_Pacientes, aux1, &tamactual);
+		agregarCons(l_Consultas, aux3, &tamactual);
+
 	}
 
 	fp.close();
@@ -202,6 +234,7 @@ int suma( int num, int num2)
 	//no me deja configurarla en el main: muchos valores inicializados?(2)
 	return num + num2;
 }
+
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar) {
 
 	if (!(l_Pacientes == nullptr) || (tamactual == nullptr))
@@ -225,7 +258,7 @@ bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar) {
 	return true;
 }
 
-bool agregar(Pac*& l_Pacientes, Pac aux1, int* tamactual)
+bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 {
 	if (!(l_Pacientes == nullptr) || (tamactual == nullptr))
 		return false;
@@ -245,7 +278,27 @@ bool agregar(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 	return true;
 }
 
-bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual, int dni)
+bool agregarCons(Cons*& l_Consultas, Cons aux3, int* tamactual)
+{
+	if (!(l_Consultas == nullptr) || (tamactual == nullptr))
+		return false;
+
+	*tamactual = *tamactual + 1;
+	int i = 0;
+	Cons* NewListPac = new Cons[*tamactual];
+	while (i < *tamactual - 1 && *tamactual - 1 != 0) {
+		NewListPac[i] = l_Consultas[i];
+		i++;
+	}
+	NewListPac[i] = aux3;
+
+	delete[] l_Consultas;
+	l_Consultas = NewListPac;
+
+	return true;
+}
+
+bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
 //N es variable entera que viene por funcion como parametro formal
 {
 	int num = 0; //variable para recibir éxito o defecto de funciones de archivos
@@ -269,47 +322,66 @@ bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, i
 
 	seconds = difftime(now, mktime(&TenyAgo));
 
-	Pac* PacAux = new Pac[*tamactual];//?
+	Pac* PacAux = new Pac[*tamactual];//LISTA PARA evitar manipular lista original + copia de modo STRUCT de una a otra
 	PacAux = l_Pacientes;
+
+	//listas para traspaso de memoria de LISTA AUX a derivados
+	Pac* listArchivados = new Pac[*tamactual];
+	Pac* listInternados = new Pac[*tamactual]; //necesario?
+	
+	//de aca surge la duda fallecidos podrian ir a lista archivados? AMBOS coinciden en que SON IRRECUPERABLES --> CORREGIDO :)
+
+
 	for (i = 0; i < *tamactual; i++)
 	{
 		//PARA NO LLAMAR A ESCRITURA CONTINUOUSLY. generar lista previa para fallecidos archivados recuperables
 		//EN VEZ DE COPIAR A LISTA ACÁ. GENERAR LISTAS DINAMICAS Y LLAMARA AGREGAR implementandola dandole uso en programa
 
-		//pacientes fallecidos
+		//pacientes fallecidos => archivo FALLECIDOS
 		if ((PacAux[i].VitalState == "Fallecido") && (PacAux[i].DNI == dni))
 		{//mismo proceso pero en diferente archivo: "Dead.csv"
 			//a fx escritura le llega por nombre tipo string (dead.csv) y la fx tiene q aplicar a q escriba en ese archivo correctly
 			//(l_Pacientes.VitalState == "fallecido") || (l_Pacientes.VitalState == "Fallecido")
 			// O CONTROLAR con TLOWER en ingreso de data
-			check = EscrituraCsv("Fallecidos.csv", PacAux, tamactual);
+			listArchivados[i] = PacAux[i];
+
+	//necesario solo al final
+			check = EscrituraCsv("Fallecidos.csv", PacAux,l_Consultas, tamactual);
 			if (check == false)
 				AuxErroneos[i] = PacAux[i];//muevo el paciente a lista para re-visar los errores
 		}
 		else
+			//pacientes internados => archivo ARCHIVADOS
 			if ((PacAux[i].VitalState == "Internado") && (PacAux[i].DNI == dni))
 			{//(l_Pacientes.VitalState == "internado") || (l_Pacientes.VitalState == "Internado")
 				// O CONTROLAR con TLOWER en ingreso de data
-				check = EscrituraCsv("Archivados.csv", PacAux, tamactual);
+				listInternados[i] = PacAux[i];
+
+	//Necesario solo al final
+				check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
 				if (check == false)
 					AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
 			}
 			else
-				//posibles recuperables
-				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == dni)) //Paciente desconocida vitalidad = potrencial recuperable
-				{
-					//NO TIENE SENTIDO ALGUNO MANEJAR DATA, si NO SABES SI VIVEN
-					if ((PacAux[i].Cons.ultConsulta.anio + TenañosEnSeg < now) && (PacAux[i].DNI == dni))
+				//POSIBLES recuperables n/c (recup/irrecup)
+				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == dni)) 
+				{	//Paciente desconocida vitalidad = potrencial recuperable
+
+					//ULT CONSULTA > 10 AÑOS => IRRECUPERABLE
+					if ((PacAux[i].Cons.ultConsulta.anio + TenañosEnSeg < now) && (PacAux[i].Cons.attendance == 1)) //now.anio?
 					{
-						check = EscrituraCsv("Archivados.csv", PacAux, tamactual);
+						listArchivados[i] = PacAux[i];
+
+	//Necesario SOLO AL FINAL
+						check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
 						if (check == false)
 							AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
 					}
 					else //si paciente SE CONSULTÓ hace MENOS DE 10 AÑOS = RECUPERABLE.cambiar
-						if (PacAux[i].Cons.attendance == true)
+						if (PacAux[i].Cons.attendance == 0)
 						{		//lama a fxEscritura y escribe en archivo RECUPERABLES
 								//archivo recuperables ya existe (caso contrario, lo crea)
-							check = EscrituraCsv("Recuperables.csv", PacAux, tamactual);
+							check = EscrituraCsv("Recuperables.csv", PacAux, l_Consultas, tamactual);
 							if (check == true)
 							{	//llama funcion secretaria en donde la secretaria contacta al paciente 
 								//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
@@ -338,43 +410,71 @@ bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, i
 	return true;
 }
 
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual)
 {
-	if (l_Pacientes == nullptr || tamactual == nullptr)
-		return false;
+	if ((l_Pacientes == nullptr && (l_Consultas == nullptr)) || tamactual == nullptr)
+		return false; //ambas listas nulas entonces nada que hacer
 
-	fstream OutDataFP;
-	OutDataFP.open(NombreArchi, ios::out);
-
-	if (!(OutDataFP.is_open()))
-		return false;
-
-	int i = 0;
-
-	//escribe headers
-	OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
-	OutDataFP << "," << "DIRECCION" << "," << "EMAIL" << "," << "TELEFONO" << "," << "CELULAR";
-	OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL 1" << "," << "OBRA SOCIAL2" << "," << "PRESENTISMO" << endl;
-
-	while (i < *tamactual)
+	//habiendo constatado las dos no son nulas a la vez,
+	//si una es nula, escribe en la otra, significa q la está llamando la lista que quiere escribir
+	if (l_Consultas == nullptr)
 	{
-		OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender << "," <<
-			l_Pacientes[i].birthDate.dia << "/" << l_Pacientes[i].birthDate.mes << "/" << l_Pacientes[i].birthDate.anio << "," <<
-			l_Pacientes[i].VitalState << "," << l_Pacientes[i].ensurance << endl;
-		OutDataFP << "," << l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << l_Pacientes[i].Cont.telefono << "," <<
-			l_Pacientes[i].Cont.celular << "," << endl;
-		OutDataFP << l_Pacientes[i].Cons.ultConsulta.dia << "/" << l_Pacientes[i].Cons.ultConsulta.mes << "/" << l_Pacientes[i].Cons.ultConsulta.anio
-			<< "/" << l_Pacientes[i].Cons.turnoSolicitado.dia << "/" << l_Pacientes[i].Cons.turnoSolicitado.mes
-			<< "/" << l_Pacientes[i].Cons.turnoSolicitado.anio << "," << l_Pacientes[i].Cons.ensurance1 << "," << l_Pacientes[i].Cons.ensurance2
-			<< "," << l_Pacientes[i].Cons.matriculaMed << "," << l_Pacientes[i].Cons.attendance << endl;
-		i++;
-	}
+		fstream OutDataFP; //maneja data de PACIENTES
+		OutDataFP.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
 
+		if (!(OutDataFP.is_open()))
+			return false;
+
+		int i = 0;
+
+		//escribe headers
+		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
+		OutDataFP << "," << "DIRECCION" << "," << "EMAIL" << "," << "TELEFONO" << "," << "CELULAR";
+		OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL 1" << "," << "OBRA SOCIAL2" << "," << "PRESENTISMO" << endl;
+		while (i < *tamactual)
+		{
+			OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender << "," <<
+				l_Pacientes[i].birthDate.dia << "/" << l_Pacientes[i].birthDate.mes << "/" << l_Pacientes[i].birthDate.anio << "," <<
+				l_Pacientes[i].VitalState << "," << l_Pacientes[i].ensurance << endl;
+			OutDataFP << "," << l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << l_Pacientes[i].Cont.telefono << "," <<
+				l_Pacientes[i].Cont.celular << "," << endl;
+			OutDataFP << l_Pacientes[i].Cons.ultConsulta.dia << "/" << l_Pacientes[i].Cons.ultConsulta.mes << "/" << l_Pacientes[i].Cons.ultConsulta.anio
+				<< "/" << l_Pacientes[i].Cons.turnoSolicitado.dia << "/" << l_Pacientes[i].Cons.turnoSolicitado.mes
+				<< "/" << l_Pacientes[i].Cons.turnoSolicitado.anio << "," << l_Pacientes[i].Cons.ensurance1 << "," << l_Pacientes[i].Cons.ensurance2
+				<< "," << l_Pacientes[i].Cons.matriculaMed << "," << l_Pacientes[i].Cons.attendance << endl;
+			i++;
+		}
+
+		return true;
+	}
+	if (l_Pacientes == nullptr)
+	{
+		fstream OutDataFP2; //maneja data de PACIENTES
+		OutDataFP2.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
+
+		if (!(OutDataFP2.is_open()))
+			return false;
+
+		int i = 0;
+
+		//escribe headers
+		OutDataFP2 << "DNI(...)";
+		while (i < *tamactual)
+		{
+			OutDataFP2 << l_Consultas[i].DNI << "(...)";
+			i++;
+		}
+
+		return true;
+
+	}
+	
 	return true;
 
 }
 
 bool Secretaría(Pac*& PacAux, int* tamactual, unsigned int dni)
 {
+	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
 	return true;
 }
