@@ -215,7 +215,6 @@ bool Secretaría(Pac*& PacAux, int* tamactual, unsigned int dni)
 }
 
 bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, int* tamactual, int dni)
-//N es variable entera que viene por funcion como parametro formal
 {
 	int num = 0; //variable para recibir éxito o defecto de funciones de archivos
 	int i;
@@ -238,66 +237,91 @@ bool Busqueda(Pac*& l_Pacientes, contacto* l_Contactos, consulta* l_Consultas, i
 
 	seconds = difftime(now, mktime(&TenyAgo));
 
-	Pac* PacAux = new Pac[*tamactual];//?
+	Pac* PacAux = new Pac[*tamactual];//LISTA PARA evitar manipular lista original + copia de modo STRUCT de una a otra
 	PacAux = l_Pacientes;
+
+	//listas para traspaso de memoria de LISTA AUX a derivados
+	Pac* listArchivados = new Pac[*tamactual];
+	Pac* listInternados = new Pac[*tamactual]; //necesario?
+	
+	//de aca surge la duda fallecidos podrian ir a lista archivados? AMBOS coinciden en que SON IRRECUPERABLES --> CORREGIDO :)
+
+
 	for (i = 0; i < *tamactual; i++)
 	{
-		//pacientes fallecidos
+		//PARA NO LLAMAR A ESCRITURA CONTINUOUSLY. generar lista previa para fallecidos archivados recuperables
+		//EN VEZ DE COPIAR A LISTA ACÁ. GENERAR LISTAS DINAMICAS Y LLAMARA AGREGAR implementandola dandole uso en programa
+
+		//pacientes fallecidos => archivo FALLECIDOS
 		if ((PacAux[i].VitalState == "Fallecido") && (PacAux[i].DNI == dni))
 		{//mismo proceso pero en diferente archivo: "Dead.csv"
 			//a fx escritura le llega por nombre tipo string (dead.csv) y la fx tiene q aplicar a q escriba en ese archivo correctly
 			//(l_Pacientes.VitalState == "fallecido") || (l_Pacientes.VitalState == "Fallecido")
 			// O CONTROLAR con TLOWER en ingreso de data
-			check = EscrituraCsv("Fallecidos.csv", PacAux, tamactual);
+			listArchivados[i] = PacAux[i];
+
+	//necesario solo al final
+			check = EscrituraCsv("Fallecidos.csv", PacAux,l_Consultas, tamactual);
 			if (check == false)
 				AuxErroneos[i] = PacAux[i];//muevo el paciente a lista para re-visar los errores
 		}
 		else
+			//pacientes internados => archivo ARCHIVADOS
 			if ((PacAux[i].VitalState == "Internado") && (PacAux[i].DNI == dni))
 			{//(l_Pacientes.VitalState == "internado") || (l_Pacientes.VitalState == "Internado")
 				// O CONTROLAR con TLOWER en ingreso de data
-				check = EscrituraCsv("Archivados.csv", PacAux, tamactual);
+				listInternados[i] = PacAux[i];
+
+	//Necesario solo al final
+				check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
 				if (check == false)
 					AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
 			}
 			else
-				//posibles recuperables
-				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == dni)) //Paciente desconocida vitalidad = potrencial recuperable
-				{
-					//NO TIENE SENTIDO ALGUNO MANEJAR DATA, si NO SABES SI VIVEN
-					if ((PacAux[i].Cons.ultConsulta.anio + TenañosEnSeg < now) && (PacAux[i].DNI == dni))
+				//POSIBLES recuperables n/c (recup/irrecup)
+				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == dni)) 
+				{	//Paciente desconocida vitalidad = potrencial recuperable
+
+					//ULT CONSULTA > 10 AÑOS => IRRECUPERABLE
+					if ((PacAux[i].Cons.ultConsulta.anio + TenañosEnSeg < now) && (PacAux[i].Cons.attendance == 1)) //now.anio?
 					{
-						check = EscrituraCsv("Archivados.csv", PacAux, tamactual);
+						listArchivados[i] = PacAux[i];
+
+	//Necesario SOLO AL FINAL
+						check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
 						if (check == false)
 							AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
 					}
-				}
-				else
-					if (PacAux[i].Cons.attendance == true)
-					{		//lama a fxEscritura y escribe en archivo RECUPERABLES
-							//archivo recuperables ya existe (caso contrario, lo crea)
-						check = EscrituraCsv("Recuperables.csv", PacAux, tamactual);
-						if (check == true)
-						{	//llama funcion secretaria en donde la secretaria contacta al paciente 
-							//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
-							check = Secretaría(PacAux, tamactual, dni);
-							if (check == false)
+					else //si paciente SE CONSULTÓ hace MENOS DE 10 AÑOS = RECUPERABLE.cambiar
+						if (PacAux[i].Cons.attendance == 0)
+						{		//lama a fxEscritura y escribe en archivo RECUPERABLES
+								//archivo recuperables ya existe (caso contrario, lo crea)
+							check = EscrituraCsv("Recuperables.csv", PacAux, l_Consultas, tamactual);
+							if (check == true)
+							{	//llama funcion secretaria en donde la secretaria contacta al paciente 
+								//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
+								check = Secretaría(PacAux, tamactual, dni);
+								if (check == false)
+									AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
+								/*en la cual el desarrollo incluiría :
+								* decisión: retorno/no retorna
+								* posible fallo: paciente no responde solucion:volver a contactar en tiempo
+								* posible cambio obra social. caso positivo/negativo: informa y actualiza
+								* OBRA SOCIAL 2 DEBERÍA ESTAR EN BLANK
+								* genera y escribe archivos pertinentes
+								* envia
+								* IGUALAR fxSecretaria a variable NUM
+								* si num == 1, proceso exitoso, si num==0, error
+								*/
+							}
+							else
 								AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-							/*en la cual el desarrollo incluiría :
-							* decisión: retorno/no retorna
-							* posible fallo: paciente no responde solucion:volver a contactar en tiempo
-							* posible cambio obra social. caso positivo/negativo: informa y actualiza
-							* OBRA SOCIAL 2 DEBERÍA ESTAR EN BLANK
-							* genera y escribe archivos pertinentes
-							* envia
-							* IGUALAR fxSecretaria a variable NUM
-							* si num == 1, proceso exitoso, si num==0, error
-							*/
 						}
-						else
-							AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-					}
+				}
 	}
+	delete[]PacAux;
+	l_Pacientes = PacAux; //redirecciono
+	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
 	return true;
 }
 

@@ -30,7 +30,7 @@ struct contacto
 struct medico
 {
 	string matriculaMed;
-	string firstName, lastNmae;
+	string firstName, lastName;
 	string telefono;
 	string especialidad;
 	bool activo;
@@ -67,9 +67,9 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string M
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual);
 bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool agregarCons(Cons*& l_Cons, Cons consulta, int* tamactual);
-bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
+bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);//des-uso
 bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni);
-bool Secretaría(Pac*& l_Pacientes, int* tamactual, unsigned int dni);
+bool Secretaría(string NombreArchi);
 //PROTOTIPOS
 bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni);
 int suma(int num, int num2);
@@ -299,37 +299,28 @@ bool agregarCons(Cons*& l_Consultas, Cons aux3, int* tamactual)
 }
 
 bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
-//N es variable entera que viene por funcion como parametro formal
 {
-	int num = 0; //variable para recibir éxito o defecto de funciones de archivos
-	int i;
+	if ((l_Pacientes == nullptr && (l_Consultas == nullptr)) || tamactual == nullptr)
+		return false; 
 
+	int i = 0;
 	bool check = true;
-	Pac* AuxErroneos;//ENVEZ = implementar funcion AGREGAR
 
-	//implementamos utilización LIBRERIA CTIME entonces transformamos variables segundos con time_t.
-	int TenañosEnSeg = 10;
-	time_t now;
-	time_t timer;
-	struct tm TenyAgo = { 0 };
-	double seconds;
-	time(&now);
-
-	TenyAgo.tm_hour = 0;   TenyAgo.tm_min = 0; TenyAgo.tm_sec = 0;
-	TenyAgo.tm_year = TenyAgo.tm_year - 10; TenyAgo.tm_mon = 0; TenyAgo.tm_mday = 1;
-
-	time(&timer);  /* get current time; same as: timer = time(NULL)  */
-
-	seconds = difftime(now, mktime(&TenyAgo));
-
-	Pac* PacAux = new Pac[*tamactual];//LISTA PARA evitar manipular lista original + copia de modo STRUCT de una a otra
-	PacAux = l_Pacientes;
-
-	//listas para traspaso de memoria de LISTA AUX a derivados
+	//yaque implementar funcion AGREGAR no es posible: :(
+	Pac* AuxErroneos = new Pac[*tamactual];
 	Pac* listArchivados = new Pac[*tamactual];
-	Pac* listInternados = new Pac[*tamactual]; //necesario?
+	Pac* listRecup = new Pac[*tamactual];
 	
-	//de aca surge la duda fallecidos podrian ir a lista archivados? AMBOS coinciden en que SON IRRECUPERABLES --> CORREGIDO :)
+	//implementamos LIBRERIA CTIME
+	time_t mytime;
+	mytime = time(NULL); //pido el dia de hoy
+	struct tm* hoy = localtime(&mytime);
+	int mes = hoy->tm_mon + 1;
+	int dia = hoy->tm_mday;
+	int anio = hoy->tm_year + 1900;
+	int hora = hoy->tm_hour;
+	int minuto = hoy->tm_min;
+	int segundo = hoy->tm_sec;
 
 
 	for (i = 0; i < *tamactual; i++)
@@ -337,86 +328,91 @@ bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
 		//PARA NO LLAMAR A ESCRITURA CONTINUOUSLY. generar lista previa para fallecidos archivados recuperables
 		//EN VEZ DE COPIAR A LISTA ACÁ. GENERAR LISTAS DINAMICAS Y LLAMARA AGREGAR implementandola dandole uso en programa
 
-		//pacientes fallecidos => archivo FALLECIDOS
-		if ((PacAux[i].VitalState == "Fallecido") && (PacAux[i].DNI == dni))
-		{//mismo proceso pero en diferente archivo: "Dead.csv"
-			//a fx escritura le llega por nombre tipo string (dead.csv) y la fx tiene q aplicar a q escriba en ese archivo correctly
+		//pacientes fallecidos/internados --> ARCHIVO ARCHIVADOS
+		if ((l_Pacientes[i].DNI == dni) && (l_Pacientes[i].VitalState == "Fallecido" || l_Pacientes[i].VitalState == "Internado"))
+		{	
+			listArchivados[i] = l_Pacientes[i];
+			/*a fx escritura le llega por nombre tipo string(dead.csv) y la fx tiene q aplicar a q escriba en ese archivo correctly
 			//(l_Pacientes.VitalState == "fallecido") || (l_Pacientes.VitalState == "Fallecido")
 			// O CONTROLAR con TLOWER en ingreso de data
-			listArchivados[i] = PacAux[i];
-
-	//necesario solo al final
-			check = EscrituraCsv("Fallecidos.csv", PacAux,l_Consultas, tamactual);
+			check = agregarPac(listArchivados,PacAux2,tamactual); //INTENCION es que PacAux2 tenga info de l_Pacientes
+			listArchivados[i] = l_Pacientes[i];
+			check = EscrituraCsv("Fallecidos.csv", l_Pacientes,l_Consultas, tamactual);
 			if (check == false)
-				AuxErroneos[i] = PacAux[i];//muevo el paciente a lista para re-visar los errores
+				AuxErroneos[i] = l_Pacientes[i];//muevo el paciente a lista para re-visar los errores
+			*/
 		}
 		else
-			//pacientes internados => archivo ARCHIVADOS
-			if ((PacAux[i].VitalState == "Internado") && (PacAux[i].DNI == dni))
-			{//(l_Pacientes.VitalState == "internado") || (l_Pacientes.VitalState == "Internado")
-				// O CONTROLAR con TLOWER en ingreso de data
-				listInternados[i] = PacAux[i];
-
-	//Necesario solo al final
-				check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
-				if (check == false)
-					AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-			}
-			else
-				//POSIBLES recuperables n/c (recup/irrecup)
-				if (PacAux[i].VitalState == "n/c" && (PacAux[i].DNI == dni)) 
-				{	//Paciente desconocida vitalidad = potrencial recuperable
-
-					//ULT CONSULTA > 10 AÑOS => IRRECUPERABLE
-					if ((PacAux[i].Cons.ultConsulta.anio + TenañosEnSeg < now) && (PacAux[i].Cons.attendance == 1)) //now.anio?
-					{
-						listArchivados[i] = PacAux[i];
-
-	//Necesario SOLO AL FINAL
-						check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
-						if (check == false)
-							AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-					}
-					else //si paciente SE CONSULTÓ hace MENOS DE 10 AÑOS = RECUPERABLE.cambiar
-						if (PacAux[i].Cons.attendance == 0)
-						{		//lama a fxEscritura y escribe en archivo RECUPERABLES
-								//archivo recuperables ya existe (caso contrario, lo crea)
-							check = EscrituraCsv("Recuperables.csv", PacAux, l_Consultas, tamactual);
-							if (check == true)
-							{	//llama funcion secretaria en donde la secretaria contacta al paciente 
-								//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
-								check = Secretaría(PacAux, tamactual, dni);
-								if (check == false)
-									AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-								/*en la cual el desarrollo incluiría :
-								* decisión: retorno/no retorna
-								* posible fallo: paciente no responde solucion:volver a contactar en tiempo
-								* posible cambio obra social. caso positivo/negativo: informa y actualiza
-								* OBRA SOCIAL 2 DEBERÍA ESTAR EN BLANK
-								* genera y escribe archivos pertinentes
-								* envia
-								* IGUALAR fxSecretaria a variable NUM
-								* si num == 1, proceso exitoso, si num==0, error
-								*/
-							}
-							else
-								AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
-						}
+			//POSIBLES recuperables n/c (recup/irrecup) - Paciente desconocida vitalidad = potrencial recuperable
+			if (l_Pacientes[i].DNI == dni) //ELSE ADMITE la condicion de n/c
+			{	
+				//ULT CONSULTA + 10 AÑOS => IRRECUPERABLE
+				if (l_Pacientes[i].Cons.ultConsulta.anio + 10 < hoy->tm_year)
+				{
+					if (l_Pacientes[i].Cons.attendance == 1)
+						listArchivados[i] = l_Pacientes[i];
+					else
+						listRecup[i] = l_Pacientes[i];
+					/*Necesario SOLO AL FINAL
+					check = EscrituraCsv("Archivados.csv", PacAux, l_Consultas, tamactual);
+					if (check == false)
+						AuxErroneos[i].DNI = l_Pacientes[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
+					*/
 				}
-	}
-	delete[]PacAux;
-	l_Pacientes = PacAux; //redirecciono
+
+				else //ULT CONSULTA - DE 10 AÑOS => RECUPERABLE
+					if (l_Pacientes[i].Cons.attendance == 1)
+					{	/*lama a fxEscritura y escribe en archivo RECUPERABLES
+						//archivo recuperables ya existe (caso contrario, lo crea)
+						check = EscrituraCsv("Recuperables.csv", PacAux, l_Consultas, tamactual);
+						if (check == true)
+						{	//llama funcion secretaria en donde la secretaria contacta al paciente
+							//funcion secretaria recibe un array de tipo Paciente y Consulta para editarlos
+							check = Secretaría(PacAux, tamactual, dni);
+							if (check == false)
+								AuxErroneos[i].DNI = PacAux[i].DNI;//muevo dni del paciente a lista para re-visar los errores de escritura
+							/*en la cual el desarrollo incluiría :
+							* decisión: retorno/no retorna
+							* posible fallo: paciente no responde solucion:volver a contactar en tiempo
+							* posible cambio obra social. caso positivo/negativo: informa y actualiza
+							* OBRA SOCIAL 2 DEBERÍA ESTAR EN BLANK
+							* genera y escribe archivos pertinentes
+							* envia
+							* IGUALAR fxSecretaria a variable NUM
+							* si num == 1, proceso exitoso, si num==0, error
+							*/
+						listRecup[i] = l_Pacientes[i];
+					}
+					else
+						//stays in lista original xq ES PACIENTE ACTUAL (ult consulta hace menos de 10 años y concurrida)
+						l_Pacientes[i] = l_Pacientes[i]; //prioritaria hasta encontrar instruccion adecuada
+			}
+	}//todo en el lugar donde debe estar
+
+	//traspaso de listas a archivo
+	check = EscrituraCsv("Archivados.csv", listArchivados,l_Consultas , tamactual);
+	if (check == false)
+		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
+
+	check = EscrituraCsv("Recuperables.csv", listRecup, l_Consultas, tamactual);
+	if (check == false)
+		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
+		
 	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
 	return true;
 }
 
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual)
 {
-	if ((l_Pacientes == nullptr && (l_Consultas == nullptr)) || tamactual == nullptr)
+	if ((l_Pacientes == nullptr && l_Consultas == nullptr) || tamactual == nullptr)
 		return false; //ambas listas nulas entonces nada que hacer
 
 	//habiendo constatado las dos no son nulas a la vez,
 	//si una es nula, escribe en la otra, significa q la está llamando la lista que quiere escribir
+
+	//ARCHIVADOS
+	//1b.Sus historias clínicas deben trasladarse a archivo y en el sistema debe constar, junto con el documento el rótulo “archivado”.
+	//nota: pide se imprima SOLO la HISTORIA CLINICA. no paciente. no contacto
 	if (l_Consultas == nullptr)
 	{
 		fstream OutDataFP; //maneja data de PACIENTES
@@ -428,6 +424,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 		int i = 0;
 
 		//escribe headers
+		OutDataFP << "ARCHIVADOS" << endl;
 		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
 		OutDataFP << "," << "DIRECCION" << "," << "EMAIL" << "," << "TELEFONO" << "," << "CELULAR";
 		OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL 1" << "," << "OBRA SOCIAL2" << "," << "PRESENTISMO" << endl;
@@ -447,9 +444,11 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 
 		return true;
 	}
-	if (l_Pacientes == nullptr)
+	//ARCHIVO PARA SECRETARIA
+	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
+	if (!(l_Pacientes == nullptr && l_Consultas == nullptr))
 	{
-		fstream OutDataFP2; //maneja data de PACIENTES
+		fstream OutDataFP2; 
 		OutDataFP2.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
 
 		if (!(OutDataFP2.is_open()))
@@ -461,7 +460,9 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 		OutDataFP2 << "DNI(...)";
 		while (i < *tamactual)
 		{
-			OutDataFP2 << l_Consultas[i].DNI << "(...)";
+			OutDataFP2 << l_Pacientes->firstName << l_Pacientes->lastName << l_Pacientes->Cont.celular << endl;
+			OutDataFP2 << l_Consultas[i].MedInCharge.matriculaMed << l_Consultas[i].MedInCharge.firstName << l_Consultas[i].MedInCharge.lastName <<
+				l_Consultas[i].MedInCharge.especialidad << l_Consultas[i].MedInCharge.activo << l_Consultas[i].MedInCharge.telefono;
 			i++;
 		}
 
@@ -473,8 +474,27 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 
 }
 
-bool Secretaría(Pac*& PacAux, int* tamactual, unsigned int dni)
+bool Secretaría(string NombreArchi)
 {
+/*
+* fstream FSecret;
+	FSecret.open(NombreArchi, ios::in);
+	
+	if (!(FSecret.is_open()))
+		return false;
+
+	Pac* LeeSecret = new Pac[0];
+	Cons* LeeSecret2 = new Cons[0];
+
+
+	while (FSecret)
+	{
+		FSecret >> LeeSecret->firstName >> LeeSecret->lastName >> LeeSecret->Cont.celular;
+		FSecret >> LeeSecret2->MedInCharge.matriculaMed >> LeeSecret2->MedInCharge.firstName >> LeeSecret2->MedInCharge.lastName >>
+			LeeSecret2->MedInCharge.especialidad >> LeeSecret2->MedInCharge.activo >> LeeSecret2->MedInCharge.telefono;
+
+
+*/
 	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
 	return true;
 }

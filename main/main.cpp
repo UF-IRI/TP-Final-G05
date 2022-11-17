@@ -25,9 +25,23 @@ int main()
 	int segundo = hoy->tm_sec;
 	cout << "Estamos en el" << dia << "/" << mes << "/" << anio << endl << "son" << hora << "/" << minuto << "/" << segundo << endl;
 
+	time_t now;
+	time_t timer;
+	struct tm TenyAgo = { 0 };
+	double seconds;
+	time(&now);
+
+	TenyAgo.tm_hour = 0;   TenyAgo.tm_min = 0; TenyAgo.tm_sec = 0;
+	TenyAgo.tm_year = TenyAgo.tm_year - 10; TenyAgo.tm_mon = 0; TenyAgo.tm_mday = 1;
+
+	time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+	seconds = difftime(now, mktime(&TenyAgo));
+
+
+	//PATH Y RUTA DE ARCHIVO	
 	string pathPac, pathCons, pathCont, pathMed;
 	
-	//PATH Y RUTA DE ARCHIVO	
 	pathPac = "..\\..\\..\\C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files";
 	pathCons = "C\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files";
 	pathCont = "C\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files";
