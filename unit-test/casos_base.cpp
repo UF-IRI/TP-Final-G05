@@ -32,7 +32,7 @@ namespace Casos_Base::tests
 	}
 
 	//AGREGAR
-	TEST(agregar, correcto) 
+	TEST(agregarPac, correcto) 
 	{
 		//AAA --> Arrange-Act-Assert
 		//Arrange
