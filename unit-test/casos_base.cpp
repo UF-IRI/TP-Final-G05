@@ -15,10 +15,10 @@ namespace Casos_Base::tests
 		
 		//Act
 		Pac* result;
-		result = ProtoLectura(PacientesA, ConsultasA, ContactosA, MedA, DNI);
+		result = LecturaCsv(PacientesA, ConsultasA, ContactosA, MedA, DNI);
 
 		//Assert
-		EXPECT_EQ(ProtoLectura("hola.?", "<210ds", "sidndan","sidndan", 45296137), result);
+		EXPECT_EQ(LecturaCsv("hola.?", "<210ds", "sidndan","sidndan", 45296137), result);
 	}
 
 	//incorrecta
@@ -48,7 +48,15 @@ namespace Casos_Base::tests
 		EXPECT_EQ(expected, actual);
 	}
 
-	TEST(Casos_Base, Test_Caso3) {
-		ASSERT_THAT(1, 1);
+	TEST(Busqueda, Funcionalidad)
+	{
+		Pac* lista = nullptr;
+		int* tamaño = {};
+		int dni = 33532434;
+	
+		bool expected = false;
+		bool actual = Busqueda(lista, tamaño, dni);
+
+		EXPECT_FALSE(expected,actual);
 	}
 }

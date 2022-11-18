@@ -69,8 +69,6 @@ bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);//des-uso
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
 bool Secretaria(string NombreArchi, Pac* AuxErroneos);
-//PROTOTIPOS
-Pac* ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni);
 
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
 {
@@ -150,81 +148,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 }
 
 //LECTURA PROTOTIPO UNITTEST
-Pac* ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
-{
-	fstream fp;
-	fstream fp2;
-	fstream fp3;
-	fstream fp4;
-	fp.open(PacientesA, ios::in);
-	fp2.open(ConsultasA, ios::in);
-	fp3.open(ContactosA, ios::in);
-	fp4.open(PacientesA, ios::in);
 
-	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open()) && (fp4.is_open())))
-		return false;
-
-	Pac* l_Pacientes = new Pac[0]; 
-	Cons* l_Consultas = new Cons[0];
-	Pac aux1;
-	Cont aux2;
-	Cons aux3;
-	Med aux4;
-	
-	string dummy;
-	char coma;
-	int tamactual = 0;
-
-	//leo headers todos archivos (3) ARREGLAR- no se leen los ENDL cuando leyendo headers
-	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >>
-		dummy >> coma >> dummy >> coma >> dummy;
-	fp2 >> dummy >> coma >> dummy >> coma >> dummy;
-	fp3 >> dummy >> coma >> dummy >> coma >> dummy;
-
-	while (fp)
-	{
-		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
-			aux1.birthDate.dia >> coma >> aux1.birthDate.mes >> coma >> aux1.birthDate.anio >> coma >> aux1.VitalState;
-		//recorre, lee archivo paciente y guarda en struct paciente
-		while ((dni == aux1.DNI) || fp2) {
-			fp2 >> dni >> coma; //cambiar todos headers de----------------------------------------------
-			if (dni == aux2.DNI) {
-				l_Pacientes->Cont = aux2;
-				break; //no necesario? condicion while
-			}
-		}
-		while ((dni == aux3.DNI) || fp3)
-		{
-			fp3 >> dni >> coma; //cambiar todos headers de------------------------------------------------
-			if (dni == aux3.DNI) {
-				l_Pacientes->Cons = aux3;
-				break; //no necesario? condicion while
-			}
-		}
-		while (fp4)
-		{
-
-			fp4 >> dni >> coma; //cambiar todos headers de------------------------------------------------
-			if (aux3.matriculaMed == aux4.matriculaMed)
-				//copia la info leida del archivo en el apartado de la lista pacientes
-				l_Pacientes->Cons.MedInCharge = aux4;
-		}
-
-		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
-		fp3.seekg(fp3.beg);
-		fp4.seekg(fp4.beg);
-		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
-
-		agregarPac(l_Pacientes, aux1, &tamactual);
-
-	}
-
-	fp.close();
-	fp2.close();
-	fp3.close();
-
-	return l_Pacientes;
-}
 
 //PROTOTIPO UNIT TEST
 int suma( int num, int num2)
