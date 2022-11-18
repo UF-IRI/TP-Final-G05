@@ -62,6 +62,7 @@ bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
 bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 
+
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA)
 {
 	fstream fp; //pacientes
@@ -92,7 +93,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
 			aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.VitalState;
 		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
-		while (fp2) 
+		while (fp2)
 		{
 			fp2 >> aux2.DNI;
 			if (aux1.DNI == aux2.DNI)
@@ -116,7 +117,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 		{
 			fp4 >> aux4.matriculaMed >> coma;
 			if (aux3.matriculaMed == aux4.matriculaMed)
-			{	
+			{
 				fp4 >> aux4.firstName >> coma >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
 				//copia la info leida del archivo en el apartado de la lista pacientes
 				l_Pacientes->Cons.MedInCharge = aux4;
@@ -156,7 +157,7 @@ bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 {
 	if ((l_Pacientes == nullptr) || tamactual == nullptr)
-		return false; 
+		return false;
 
 	int i = 0;
 	bool check = true;
@@ -165,7 +166,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	Pac* AuxErroneos = new Pac[*tamactual];
 	Pac* listArchivados = new Pac[*tamactual];
 	Pac* listRecup = new Pac[*tamactual];
-	
+
 	//implementamos LIBRERIA CTIME
 	time_t mytime;
 	mytime = time(NULL); //pido el dia de hoy
@@ -181,10 +182,10 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	for (i = 0; i < *tamactual; i++)
 	{
 		//generamos listas previas para (archivados recuperables). luego traspaso a archivo
-		
+
 		//pacientes fallecidos/internados = ARCHIVO ARCHIVADOS
 		if ((l_Pacientes[i].DNI == dni) && (l_Pacientes[i].VitalState == "Fallecido" || l_Pacientes[i].VitalState == "Internado"))
-		{	
+		{
 			listArchivados[i] = l_Pacientes[i];
 			/*
 			*	(l_Pacientes.VitalState == "fallecido") || (l_Pacientes.VitalState == "Fallecido")
@@ -194,13 +195,13 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 		else
 			//POSIBLES recuperables n/c (recup/irrecup)
 			if (l_Pacientes[i].DNI == dni) //ELSE ADMITE la condicion de n/c
-			{	
+			{
 				//ULT CONSULTA + 10 AÑOS = IRRECUPERABLE
 				//cambio:---------CAMBIAR A ADMITIR DIA MES Y AÑO-----------------	
 				if (l_Pacientes[i].Cons.ultConsulta + 10 < hoy->tm_year)
 				{
 					if (l_Pacientes[i].Cons.attendance == 1)
-						listArchivados[i] = l_Pacientes[i];	
+						listArchivados[i] = l_Pacientes[i];
 					else
 						listRecup[i] = l_Pacientes[i];
 				}
@@ -218,7 +219,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	check = EscrituraCsv("Recuperables.csv", listRecup, tamactual);
 	if (check == false)
 		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
-		
+
 	check = Secretaria("Erroneos.csv", AuxErroneos);
 	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
 	/*funcion secretaria recibe un array de tipo Paciente
@@ -232,7 +233,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	* IGUALAR fxSecretaria a variable NUM
 	* si num == 1, proceso exitoso, si num==0, error
 	*/
-	
+
 	delete[]AuxErroneos;
 	delete[]listArchivados;
 	delete[]listRecup;
@@ -240,7 +241,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	AuxErroneos = nullptr;
 	listArchivados = nullptr;
 	listRecup = nullptr;
-	
+
 	return true;
 }
 
@@ -266,14 +267,14 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 		OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL 1" << "," << "OBRA SOCIAL2" << "," << "PRESENTISMO" << endl;
 		while (i < *tamactual)
 		{ //cambio: para leer fechas con time_t: es necesario poner que lea 3 variables o que lea una sola
-			OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender 
+			OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender
 				<< "," << l_Pacientes[i].birthDate << "/" << l_Pacientes[i].birthDate << "/" << l_Pacientes[i].birthDate << "," <<
 				l_Pacientes[i].VitalState << "," << endl;
-			OutDataFP << "," << l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << l_Pacientes[i].Cont.telefono 
+			OutDataFP << "," << l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << l_Pacientes[i].Cont.telefono
 				<< "," << l_Pacientes[i].Cont.celular << "," << endl;
 			OutDataFP << l_Pacientes[i].Cons.ultConsulta << "/" << l_Pacientes[i].Cons.ultConsulta << "/" << l_Pacientes[i].Cons.ultConsulta
-				<< "/" << l_Pacientes[i].Cons.turnoSolicitado << "/" << l_Pacientes[i].Cons.turnoSolicitado << "/" << 
-				l_Pacientes[i].Cons.turnoSolicitado << "," << l_Pacientes[i].Cons.ensurance << "," << "," << l_Pacientes[i].Cons.matriculaMed 
+				<< "/" << l_Pacientes[i].Cons.turnoSolicitado << "/" << l_Pacientes[i].Cons.turnoSolicitado << "/" <<
+				l_Pacientes[i].Cons.turnoSolicitado << "," << l_Pacientes[i].Cons.ensurance << "," << "," << l_Pacientes[i].Cons.matriculaMed
 				<< "," << l_Pacientes[i].Cons.attendance << endl;
 			i++;
 		}
@@ -285,7 +286,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
 	if (NombreArchi == "Recuperables.csv")
 	{
-		fstream OutDataFP2; 
+		fstream OutDataFP2;
 		OutDataFP2.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
 
 		if (!(OutDataFP2.is_open()))
@@ -307,38 +308,38 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 		return true;
 
 	}
-	
+
 	return true;
 
 }
 
-bool Secretaria(string NombreArchi, Pac *AuxErroneos)
+bool Secretaria(string NombreArchi, Pac* AuxErroneos)
 {
 	if (AuxErroneos == nullptr)
 		return false;
-/*
-* fstream FSecret;
-	FSecret.open(NombreArchi, ios::in);
-	
-	if (!(FSecret.is_open()))
-		return false;
+	/*
+	* fstream FSecret;
+		FSecret.open(NombreArchi, ios::in);
 
-	Pac* LeeSecret = new Pac[0];
-	Cons* LeeSecret2 = new Cons[0];
+		if (!(FSecret.is_open()))
+			return false;
+
+		Pac* LeeSecret = new Pac[0];
+		Cons* LeeSecret2 = new Cons[0];
 
 
-	while (FSecret)
-	{
-		FSecret >> LeeSecret->firstName >> LeeSecret->lastName >> LeeSecret->Cont.celular;
-		FSecret >> LeeSecret2->MedInCharge.matriculaMed >> LeeSecret2->MedInCharge.firstName >> LeeSecret2->MedInCharge.lastName >>
-			LeeSecret2->MedInCharge.especialidad >> LeeSecret2->MedInCharge.activo >> LeeSecret2->MedInCharge.telefono;
+		while (FSecret)
+		{
+			FSecret >> LeeSecret->firstName >> LeeSecret->lastName >> LeeSecret->Cont.celular;
+			FSecret >> LeeSecret2->MedInCharge.matriculaMed >> LeeSecret2->MedInCharge.firstName >> LeeSecret2->MedInCharge.lastName >>
+				LeeSecret2->MedInCharge.especialidad >> LeeSecret2->MedInCharge.activo >> LeeSecret2->MedInCharge.telefono;
 
-		if(string respuesta == "si")
-		cout << "retorna";
-		else 
-		cout << "no retorna";
+			if(string respuesta == "si")
+			cout << "retorna";
+			else
+			cout << "no retorna";
 
-*/
+	*/
 	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
 	return true;
 }

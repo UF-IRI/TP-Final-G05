@@ -2,13 +2,7 @@
 #include <MiLibreria.cpp>
 #include <iostream>
 
-/*
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
-bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
-bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);
-bool Secretaría(Pac*& l_Pacientes, int* tamactual, unsigned int DNI);
-*/
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA);
+using namespace std;
 
 int main()
 {
