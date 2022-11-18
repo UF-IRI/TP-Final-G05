@@ -3,21 +3,25 @@
 
 namespace Casos_Base::tests
 {
-	TEST(LecturaCsv, lecturaCorrecta) { //FUNCIONA TEST +
+	TEST(LecturaCsv, lecturaCorrecta) 
+	{
+		//cambio: supuestamente dice que lo que en realidad retorna la funcion no es lo que esperamos: osea funciona bien
 		//AAA --> Arrange-Act-Assert
 		//Arrange
-		//generar string randoms para nombre?
-		string PacientesA = "hola.?";
-		string ConsultasA = "<210ds´+";
-		string ContactosA = "sidndan";
-		string MedA = "sidndan";
+		string pathPac, pathCons, pathCont, pathMed;
+
+		pathPac = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
+		pathCons = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
+		pathCont = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
+		pathMed = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 		
+		Pac* expected = nullptr;
 		//Act
-		Pac* result;
-		result = LecturaCsv(PacientesA, ConsultasA, ContactosA, MedA);
+		Pac* actual;
+		actual = LecturaCsv(pathPac, pathCons, pathCont, pathMed);
 
 		//Assert
-		EXPECT_EQ(LecturaCsv("hola.?", "<210ds", "sidndan","sidndan"), result);
+		EXPECT_NE(expected, actual); 
 	}
 
 	//incorrecta
@@ -26,17 +30,18 @@ namespace Casos_Base::tests
 		//AAA --> Arrange-Act-Assert
 		//Arrange
 		int x = 10;
-		int* n = &x;
 		int i = 0;
-		int* lista = new int[x];
-		Pac* listaPac = new Pac[*n];
-		for (i = 0; i < *n; i++)
-			lista[i] = i;
-		listaPac->DNI = lista[i];
+		int* listaInt = new int[x];
+		Pac* listaPac = new Pac[x];
+		for (i = 0; i < x; i++)
+		{
+			listaInt[i] = i;
+			listaPac->DNI = listaInt[i];
+		}
+		//10 dni ingresados
 
 		string nombre = "ABRIR.csv";
 
-		//10 dni ingresadis
 
 		bool expected;
 
@@ -44,6 +49,7 @@ namespace Casos_Base::tests
 
 		EXPECT_TRUE(expected, actual);
 		
+		delete[]listaInt;
 		delete[]listaPac;
 	}
 
