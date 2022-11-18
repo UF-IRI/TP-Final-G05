@@ -12,9 +12,9 @@ namespace Casos_Base::tests
 		string ContactosA = "sidndan";
 		string MedA = "sidndan";
 		int DNI = 45296137;
-		
+
 		//Act
-		Pac* result;
+		bool result = true;
 		result = ProtoLectura(PacientesA, ConsultasA, ContactosA, MedA, DNI);
 
 		//Assert
@@ -50,5 +50,18 @@ namespace Casos_Base::tests
 
 	TEST(Casos_Base, Test_Caso3) {
 		ASSERT_THAT(1, 1);
+	}
+
+	TEST(explicacion, suma) {
+		//AAA --> Arrange-Act-Assert
+		//Arrange
+		int a = 4;
+		int b = 4;
+		int expected = 8;
+		
+		//Act
+		int actual = suma(a, b);
+
+		ASSERT_EQ(expected, actual);
 	}
 }

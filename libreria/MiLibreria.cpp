@@ -63,16 +63,14 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA,int dni);
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual);
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA, int dni);
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
 bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
-bool agregarCons(Cons*& l_Cons, Cons consulta, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);//des-uso
-bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni);
-bool Secretaría(string NombreArchi);
+bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
+bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 //PROTOTIPOS
-bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni);
-int suma(int num, int num2);
+Pac* ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni);
 
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
 {
@@ -111,47 +109,48 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
 			aux1.birthDate.dia >> coma >> aux1.birthDate.mes >> coma >> aux1.birthDate.anio >> coma >> aux1.VitalState;
 		//recorre, lee archivo paciente y guarda en struct paciente
-		while ((dni == aux1.DNI) || fp2) 
+		while (fp2) 
 		{
-			fp2 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			fp2 >> aux2.DNI;
+			if (aux1.DNI == aux2.DNI)
+				fp2 >> aux2.telefono; //desarrollar las variables
 			//copia la info leida del archivo en el apartado de la lista pacientes
-			l_Pacientes->Cont = aux2;
+			aux1.Cont = aux2;
 			
 		}
-		while ((dni == aux3.DNI) || fp3)
+		while (fp3)
 		{
-			fp3 >> dni >> coma; //cambiar todos headers de------------------------------------------------
-			//copia la info leida del archivo en el apartado de la lista pacientes
-			l_Pacientes->Cons = aux3;
+			fp3 >> aux3.DNI >> coma;
+			if (aux1.DNI == aux3.DNI)
+			fp3>> aux3.matriculaMed; //desarrollar las variables
+			aux1.Cons = aux3;
 		}
 		while (fp4)
 		{
-
-			fp4 >> dni >> coma; //cambiar todos headers de------------------------------------------------
+			fp4 >> aux4.matriculaMed >> coma;
 			if (aux3.matriculaMed == aux4.matriculaMed)
 				//copia la info leida del archivo en el apartado de la lista pacientes
-				l_Consultas->MedInCharge = aux4;
+				l_Pacientes->Cons.MedInCharge = aux4;
 		}
 
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
 		fp3.seekg(fp3.beg);
 		fp4.seekg(fp4.beg);
-		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
 		agregarPac(l_Pacientes, aux1, &tamactual);
-		agregarCons(l_Consultas, aux3, &tamactual);
 
 	}
 
 	fp.close();
 	fp2.close();
 	fp3.close();
+	fp4.close();
 
 	return l_Pacientes;
 }
 
 //LECTURA PROTOTIPO UNITTEST
-bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
+Pac* ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
 {
 	fstream fp;
 	fstream fp2;
@@ -208,7 +207,7 @@ bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, strin
 			fp4 >> dni >> coma; //cambiar todos headers de------------------------------------------------
 			if (aux3.matriculaMed == aux4.matriculaMed)
 				//copia la info leida del archivo en el apartado de la lista pacientes
-				l_Consultas->MedInCharge = aux4;
+				l_Pacientes->Cons.MedInCharge = aux4;
 		}
 
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
@@ -217,7 +216,6 @@ bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, strin
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
 
 		agregarPac(l_Pacientes, aux1, &tamactual);
-		agregarCons(l_Consultas, aux3, &tamactual);
 
 	}
 
@@ -225,7 +223,7 @@ bool ProtoLectura(string PacientesA, string ConsultasA, string ContactosA, strin
 	fp2.close();
 	fp3.close();
 
-	return true;
+	return l_Pacientes;
 }
 
 //PROTOTIPO UNIT TEST
@@ -260,7 +258,7 @@ bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar) {
 
 bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 {
-	if (!(l_Pacientes == nullptr) || (tamactual == nullptr))
+	if ((l_Pacientes == nullptr) || (tamactual == nullptr))
 		return false;
 
 	*tamactual = *tamactual + 1;
@@ -278,29 +276,9 @@ bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 	return true;
 }
 
-bool agregarCons(Cons*& l_Consultas, Cons aux3, int* tamactual)
+bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 {
-	if (!(l_Consultas == nullptr) || (tamactual == nullptr))
-		return false;
-
-	*tamactual = *tamactual + 1;
-	int i = 0;
-	Cons* NewListPac = new Cons[*tamactual];
-	while (i < *tamactual - 1 && *tamactual - 1 != 0) {
-		NewListPac[i] = l_Consultas[i];
-		i++;
-	}
-	NewListPac[i] = aux3;
-
-	delete[] l_Consultas;
-	l_Consultas = NewListPac;
-
-	return true;
-}
-
-bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
-{
-	if ((l_Pacientes == nullptr && (l_Consultas == nullptr)) || tamactual == nullptr)
+	if ((l_Pacientes == nullptr) || tamactual == nullptr)
 		return false; 
 
 	int i = 0;
@@ -350,7 +328,7 @@ bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
 				if (l_Pacientes[i].Cons.ultConsulta.anio + 10 < hoy->tm_year)
 				{
 					if (l_Pacientes[i].Cons.attendance == 1)
-						listArchivados[i] = l_Pacientes[i];
+						listArchivados[i] = l_Pacientes[i];	
 					else
 						listRecup[i] = l_Pacientes[i];
 					/*Necesario SOLO AL FINAL
@@ -361,8 +339,7 @@ bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
 				}
 
 				else //ULT CONSULTA - DE 10 AÑOS => RECUPERABLE
-					if (l_Pacientes[i].Cons.attendance == 1)
-					{	/*lama a fxEscritura y escribe en archivo RECUPERABLES
+						/*lama a fxEscritura y escribe en archivo RECUPERABLES
 						//archivo recuperables ya existe (caso contrario, lo crea)
 						check = EscrituraCsv("Recuperables.csv", PacAux, l_Consultas, tamactual);
 						if (check == true)
@@ -382,48 +359,39 @@ bool Busqueda(Pac*& l_Pacientes, Cons* l_Consultas, int* tamactual, int dni)
 							* si num == 1, proceso exitoso, si num==0, error
 							*/
 						listRecup[i] = l_Pacientes[i];
-					}
-					else
-						//stays in lista original xq ES PACIENTE ACTUAL (ult consulta hace menos de 10 años y concurrida)
-						l_Pacientes[i] = l_Pacientes[i]; //prioritaria hasta encontrar instruccion adecuada
 			}
-	}//todo en el lugar donde debe estar
+	}//todo en el lugar donde debe estar	
 
 	//traspaso de listas a archivo
-	check = EscrituraCsv("Archivados.csv", listArchivados,l_Consultas , tamactual);
+	check = EscrituraCsv("Archivados.csv", listArchivados, tamactual);
 	if (check == false)
 		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
 
-	check = EscrituraCsv("Recuperables.csv", listRecup, l_Consultas, tamactual);
+	check = EscrituraCsv("Recuperables.csv", listRecup, tamactual);
 	if (check == false)
 		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
 		
+	check = Secretaria("Erroneos.csv", AuxErroneos);
 	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
 	return true;
 }
 
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int* tamactual)
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 {
-	if ((l_Pacientes == nullptr && l_Consultas == nullptr) || tamactual == nullptr)
+	if ((l_Pacientes == nullptr) || tamactual == nullptr)
 		return false; //ambas listas nulas entonces nada que hacer
 
-	//habiendo constatado las dos no son nulas a la vez,
-	//si una es nula, escribe en la otra, significa q la está llamando la lista que quiere escribir
+	fstream OutDataFP; //maneja data de PACIENTES
+	OutDataFP.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
 
-	//ARCHIVADOS
-	//1b.Sus historias clínicas deben trasladarse a archivo y en el sistema debe constar, junto con el documento el rótulo “archivado”.
-	//nota: pide se imprima SOLO la HISTORIA CLINICA. no paciente. no contacto
-	if (l_Consultas == nullptr)
+	if (!(OutDataFP.is_open()))
+		return false;
+
+	int i = 0;
+
+	//escribe headers
+	if (NombreArchi == "Archivados.csv")
 	{
-		fstream OutDataFP; //maneja data de PACIENTES
-		OutDataFP.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
-
-		if (!(OutDataFP.is_open()))
-			return false;
-
-		int i = 0;
-
-		//escribe headers
 		OutDataFP << "ARCHIVADOS" << endl;
 		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
 		OutDataFP << "," << "DIRECCION" << "," << "EMAIL" << "," << "TELEFONO" << "," << "CELULAR";
@@ -444,9 +412,10 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 
 		return true;
 	}
+
 	//ARCHIVO PARA SECRETARIA
 	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
-	if (!(l_Pacientes == nullptr && l_Consultas == nullptr))
+	if (NombreArchi == "Recuperables.csv")
 	{
 		fstream OutDataFP2; 
 		OutDataFP2.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba
@@ -460,9 +429,10 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 		OutDataFP2 << "DNI(...)";
 		while (i < *tamactual)
 		{
-			OutDataFP2 << l_Pacientes->firstName << l_Pacientes->lastName << l_Pacientes->Cont.celular << endl;
-			OutDataFP2 << l_Consultas[i].MedInCharge.matriculaMed << l_Consultas[i].MedInCharge.firstName << l_Consultas[i].MedInCharge.lastName <<
-				l_Consultas[i].MedInCharge.especialidad << l_Consultas[i].MedInCharge.activo << l_Consultas[i].MedInCharge.telefono;
+			OutDataFP2 << l_Pacientes->firstName << "," << l_Pacientes->lastName << "," << l_Pacientes->Cont.celular << endl;
+			OutDataFP2 << l_Pacientes[i].Cons.MedInCharge.matriculaMed << "," << l_Pacientes[i].Cons.MedInCharge.firstName << "," <<
+				l_Pacientes[i].Cons.MedInCharge.lastName << "," << l_Pacientes[i].Cons.MedInCharge.especialidad << "," <<
+				l_Pacientes[i].Cons.MedInCharge.activo << "," << l_Pacientes[i].Cons.MedInCharge.telefono << endl;
 			i++;
 		}
 
@@ -474,7 +444,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, Cons*& l_Consultas, int
 
 }
 
-bool Secretaría(string NombreArchi)
+bool Secretaria(string NombreArchi, Pac *AuxErroneos)
 {
 /*
 * fstream FSecret;
@@ -492,7 +462,10 @@ bool Secretaría(string NombreArchi)
 		FSecret >> LeeSecret->firstName >> LeeSecret->lastName >> LeeSecret->Cont.celular;
 		FSecret >> LeeSecret2->MedInCharge.matriculaMed >> LeeSecret2->MedInCharge.firstName >> LeeSecret2->MedInCharge.lastName >>
 			LeeSecret2->MedInCharge.especialidad >> LeeSecret2->MedInCharge.activo >> LeeSecret2->MedInCharge.telefono;
-
+		if(string respuesta == "si")
+		cout << "retorna";
+		else 
+		cout << "no retorna";
 
 */
 	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
