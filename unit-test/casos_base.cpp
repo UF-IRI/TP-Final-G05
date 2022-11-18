@@ -11,24 +11,40 @@ namespace Casos_Base::tests
 		string ConsultasA = "<210ds´+";
 		string ContactosA = "sidndan";
 		string MedA = "sidndan";
-		int DNI = 45296137;
 		
 		//Act
 		Pac* result;
-		result = LecturaCsv(PacientesA, ConsultasA, ContactosA, MedA, DNI);
+		result = LecturaCsv(PacientesA, ConsultasA, ContactosA, MedA);
 
 		//Assert
-		EXPECT_EQ(LecturaCsv("hola.?", "<210ds", "sidndan","sidndan", 45296137), result);
+		EXPECT_EQ(LecturaCsv("hola.?", "<210ds", "sidndan","sidndan"), result);
 	}
 
 	//incorrecta
-	TEST(LecturaCsv, lecturaINCorrecta)
+	TEST(Secretaria, listas)
 	{
 		//AAA --> Arrange-Act-Assert
 		//Arrange
-		string PacientesA = "";
-		string ConsultasA = "/0" ;
-		string ContactosA;
+		int x = 10;
+		int* n = &x;
+		int i = 0;
+		int* lista = new int[x];
+		Pac* listaPac = new Pac[*n];
+		for (i = 0; i < *n; i++)
+			lista[i] = i;
+		listaPac->DNI = lista[i];
+
+		string nombre = "ABRIR.csv";
+
+		//10 dni ingresadis
+
+		bool expected;
+
+		bool actual = Secretaria(nombre, listaPac);
+
+		EXPECT_TRUE(expected, actual);
+		
+		delete[]listaPac;
 	}
 
 	//AGREGAR

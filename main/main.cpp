@@ -17,14 +17,13 @@ int main()
 	string pathPac, pathCons, pathCont, pathMed;
 	//..\\..\\..\\
 
-	
 	pathPac = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 	pathCons = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 	pathCont = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 	pathMed = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 	//archivo.iri base path
 
-	bool check =  LecturaCsv(pathPac, pathCons, pathCont, pathMed, 45296137);
+	bool check =  LecturaCsv(pathPac, pathCons, pathCont, pathMed);
 	if (check == true)
 		cout << "true";
 

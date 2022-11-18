@@ -63,14 +63,14 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA, int dni);
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA);
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
 bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar);//des-uso
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
 bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA, int dni)
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA)
 {
 	fstream fp;
 	fstream fp2;
@@ -81,11 +81,16 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 	fp3.open(ContactosA, ios::in);
 	fp4.open(MedA, ios::in);
 
-	if (!((fp.is_open()) && (fp2.is_open()) && (fp3.is_open()) && (fp4.is_open()) ))
+	if (!(fp.is_open()) )
+		return nullptr;
+	if (!(fp2.is_open()))
+		return nullptr;
+	if (!(fp3.is_open()))
+		return nullptr;
+	if (!(fp4.is_open()))
 		return nullptr;
 
 	Pac* l_Pacientes = new Pac[0];
-	Cons* l_Consultas = new Cons[0];
 	Pac aux1;
 	Cont aux2;
 	Cons aux3;
@@ -100,7 +105,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 		dummy >> coma >> dummy >> coma >> dummy;
 	fp2 >> dummy >> coma >> dummy >> coma >> dummy;
 	fp3 >> dummy >> coma >> dummy >> coma >> dummy;
-	fp3 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
+	fp4 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
 
 	while (fp)
 	{
@@ -144,17 +149,8 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 	fp3.close();
 	fp4.close();
 
+	delete[]l_Pacientes;
 	return l_Pacientes;
-}
-
-//LECTURA PROTOTIPO UNITTEST
-
-
-//PROTOTIPO UNIT TEST
-int suma( int num, int num2)
-{
-	//no me deja configurarla en el main: muchos valores inicializados?(2)
-	return num + num2;
 }
 
 bool resize(Pac*& l_Pacientes, int* tamactual, int cantidad_aumentar) {
@@ -208,7 +204,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	int i = 0;
 	bool check = true;
 
-	//yaque implementar funcion AGREGAR no es posible: :(
+	//ya que implementar funcion AGREGAR no es posible: :(
 	Pac* AuxErroneos = new Pac[*tamactual];
 	Pac* listArchivados = new Pac[*tamactual];
 	Pac* listRecup = new Pac[*tamactual];
@@ -245,7 +241,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 			*/
 		}
 		else
-			//POSIBLES recuperables n/c (recup/irrecup) - Paciente desconocida vitalidad = potrencial recuperable
+			//POSIBLES recuperables n/c (recup/irrecup) - Paciente desconocida vitalidad = potencial recuperable
 			if (l_Pacientes[i].DNI == dni) //ELSE ADMITE la condicion de n/c
 			{	
 				//ULT CONSULTA + 10 AÑOS => IRRECUPERABLE
@@ -297,6 +293,11 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 		
 	check = Secretaria("Erroneos.csv", AuxErroneos);
 	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
+	
+	delete[]AuxErroneos;
+	delete[]listArchivados;
+	delete[]listRecup;
+	
 	return true;
 }
 
@@ -370,6 +371,8 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 
 bool Secretaria(string NombreArchi, Pac *AuxErroneos)
 {
+	if (AuxErroneos == nullptr)
+		return false;
 /*
 * fstream FSecret;
 	FSecret.open(NombreArchi, ios::in);
@@ -386,6 +389,7 @@ bool Secretaria(string NombreArchi, Pac *AuxErroneos)
 		FSecret >> LeeSecret->firstName >> LeeSecret->lastName >> LeeSecret->Cont.celular;
 		FSecret >> LeeSecret2->MedInCharge.matriculaMed >> LeeSecret2->MedInCharge.firstName >> LeeSecret2->MedInCharge.lastName >>
 			LeeSecret2->MedInCharge.especialidad >> LeeSecret2->MedInCharge.activo >> LeeSecret2->MedInCharge.telefono;
+
 		if(string respuesta == "si")
 		cout << "retorna";
 		else 
