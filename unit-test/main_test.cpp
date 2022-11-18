@@ -76,10 +76,12 @@ namespace foobar::tests
 		int* tamaño = {};
 		int dni = 33532434;
 
-		bool expected = false;
+		bool expected = true;
 		bool actual = Busqueda(lista, tamaño, dni);
 
-		EXPECT_FALSE(expected, actual);
+		//cambio: arreglo de aserciones
+		EXPECT_NE(expected, actual);
+		EXPECT_FALSE(actual);
 	}
 		
 }
