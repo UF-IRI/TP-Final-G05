@@ -1,6 +1,7 @@
 #include "iri.cpp"
 #include <MiLibreria.cpp>
 #include <iostream>
+#include <MiLibreria.h>
 
 using namespace std;
 
