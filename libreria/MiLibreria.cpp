@@ -1,5 +1,68 @@
 #pragma once
-#include <MiLibreria.h>
+
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <ctime>
+
+using namespace std;
+
+enum obraSocial
+{
+	medicus = 1, OSDE, IOSFA, italiano, aleman, espanyol
+};
+
+struct contacto
+{
+	unsigned int DNI;
+	string direccion;
+	string email;
+	string telefono; //(+54)911-4444-5678
+	string celular; //(+54)911-4444-5678
+
+}; typedef struct contacto Cont;
+
+struct medico
+{
+	string matriculaMed;
+	string firstName, lastName;
+	string telefono;
+	string especialidad;
+	bool activo;
+
+}; typedef struct medico Med;
+
+struct consulta
+{
+	unsigned int DNI;
+	time_t ultConsulta; //DD/MM/AA
+	time_t turnoSolicitado; //DD/MM/AA
+	string ensurance; //cambio: ahora, una sola enssurance(), en secretaria, cambiar valor de variable, si cambio
+	string matriculaMed;
+	int attendance; //0 for True 1 for False
+	Med MedInCharge;
+
+}; typedef struct consulta Cons;
+
+struct paciente
+{
+	unsigned int DNI;
+	string firstName, lastName;
+	char gender; //F for female M for male
+	time_t birthDate; //archivo pac tiene formato MM/DD/AA
+	string VitalState; //n/c - internado - fallecido
+	contacto Cont;//variable contacto de tipo contacto
+	consulta Cons; //variable consulta de tipo consulta
+
+}; typedef struct paciente Pac;
+
+//invocacion funciones
+Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA);
+bool LeerOneByOne(fstream fp, Pac*& aux);
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
+bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
+bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
+bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 
 Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA)
 {
@@ -11,6 +74,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 	//cambio: preguntas de si los archivos se abrieron correctamente: en main
 
 	Pac* l_Pacientes = new Pac[0];
+	//eliminar listas USELESS: tipo struct. mantener only el auxPac: el omnipotente
 	Pac aux1;
 	Cont aux2;
 	Cons aux3;
@@ -36,7 +100,8 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 			fp2 >> aux2.DNI;
 			if (aux1.DNI == aux2.DNI)
 			{
-				fp2 >> aux2.DNI >> coma >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
+				//cambio: antes se leia REPETIDO AGAIN el dni, lo saco xq ya no necesita leerlo denuevo. lo mismo con los de abajo
+				fp2 >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
 				//copia data de contacto en variable en lista pacientes
 				aux1.Cont = aux2;
 			}
@@ -46,7 +111,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 			fp3 >> aux3.DNI >> coma;
 			if (aux1.DNI == aux3.DNI)
 			{
-				fp3 >> aux3.DNI >> coma >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
+				fp3 >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
 					aux3.matriculaMed >> coma >> aux3.attendance;
 				aux1.Cons = aux3;
 			}
@@ -56,7 +121,7 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 			fp4 >> aux4.matriculaMed >> coma;
 			if (aux3.matriculaMed == aux4.matriculaMed)
 			{
-				fp4 >> aux4.firstName >> coma >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
+				fp4 >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
 				//copia la info leida del archivo en el apartado de la lista pacientes
 				l_Pacientes->Cons.MedInCharge = aux4;
 			}
@@ -72,9 +137,63 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 	return l_Pacientes;
 }
 
-bool LeerOneByOne(string NombreArchi, fstream fp, Pac*& aux)
+bool LeerOneByOne(fstream fp, Pac*& aux)
 {
+	/*cambio
+	Pac aux1;
 
+	string dummy;
+	char coma;
+
+	//lee el header que le toca (ANALIZAR POSIBLES FALLOS
+	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(8)
+	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Contacto=5)
+	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Consulta=6)
+	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
+	
+	 while (fp)
+	{
+		//cambio: aux.fechas. cambio de struct fecha a time_t 
+		fp >> aux->DNI >> coma >> aux->firstName >> coma >> aux->lastName >> coma >> aux->gender >> coma >>
+			aux->birthDate >> coma >> aux->birthDate >> coma >> aux->birthDate >> coma >> aux->VitalState;
+		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
+		while (fp2)
+		{
+			fp2 >> aux.Cont.DNI;
+			if (aux.DNI == aux2.Cont.DNI)
+			{
+				//cambio: antes se leia REPETIDO AGAIN el dni, lo saco xq ya no necesita leerlo denuevo. lo mismo con los de abajo
+				fp2 >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
+				//copia data de contacto en variable en lista pacientes
+				aux1.Cont = aux2;
+			}
+		}
+		while (fp3)
+		{
+			fp3 >> aux3.DNI >> coma;
+			if (aux1.DNI == aux3.DNI)
+			{
+				fp3 >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
+					aux3.matriculaMed >> coma >> aux3.attendance;
+				aux1.Cons = aux3;
+			}
+		}
+		while (fp4)
+		{
+			fp4 >> aux4.matriculaMed >> coma;
+			if (aux3.matriculaMed == aux4.matriculaMed)
+			{
+				fp4 >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
+				//copia la info leida del archivo en el apartado de la lista pacientes
+				l_Pacientes->Cons.MedInCharge = aux4;
+			}
+		}
+
+		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
+		fp3.seekg(fp3.beg);
+		fp4.seekg(fp4.beg);
+	*/ 
+	return true;
 }
 
 bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
@@ -188,7 +307,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	return true;
 }
 
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)	
 {
 	if ((l_Pacientes == nullptr) || tamactual == nullptr)
 		return false; //AMBAS listas nulas: NADA que hacer
@@ -202,7 +321,10 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	int i = 0;
 
 	//escribe headers
-	if (NombreArchi == "Archivados.csv")
+	if (NombreArchi == "Archivados.csv") 
+		/*cambio: cambiar condicion muy inaplicable inflexible
+		* IMPLEMENTAR este procedimiento en otra funcion (crearla)
+		 */
 	{
 		OutDataFP << "ARCHIVADOS" << endl;
 		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
@@ -228,6 +350,9 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	//ARCHIVO PARA SECRETARIA
 	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
 	if (NombreArchi == "Recuperables.csv")
+		/*cambio: cambiar condicion muy inaplicable inflexible
+		* IMPLEMENTAR este procedimiento en otra funcion (crearla)
+		 */
 	{
 		fstream OutDataFP2;
 		OutDataFP2.open(NombreArchi, ios::app); //APP x cada vez que lo llamen, no sobreescriba

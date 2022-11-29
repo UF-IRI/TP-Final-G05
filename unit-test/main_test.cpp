@@ -43,11 +43,11 @@ namespace foobar::tests
 		string nombre = "ABRIR.csv";
 
 
-		bool expected;
+		bool expected = true;
 
 		bool actual = Secretaria(nombre, listaPac);
 
-		EXPECT_TRUE(expected, actual);
+		EXPECT_TRUE(actual);
 
 		delete[]listaInt;
 		delete[]listaPac;
