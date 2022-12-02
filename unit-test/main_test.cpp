@@ -15,10 +15,15 @@ namespace foobar::tests
 		pathCont = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 		pathMed = "C:\\Users\\54232\\Desktop\\Mateo\\2022\BMI\\IRI\\TRABAJO FINAL\\data_files\\input";
 
+		fstream fp;
+		fstream fp2;
+		fstream fp3;
+		fstream fp4;
+
 		Pac* expected = nullptr;
 		//Act
 		Pac* actual;
-		actual = LecturaCsv(pathPac, pathCons, pathCont, pathMed);
+		actual = Lectura(fp,fp2, fp3, fp4);
 
 		//Assert
 		EXPECT_NE(expected, actual);
