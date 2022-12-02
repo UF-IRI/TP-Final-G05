@@ -57,14 +57,14 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4);
+Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int n);
 bool LeerOneByOne(fstream fp, Pac*& aux);
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
 bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
-bool Secretaria(string NombreArchi, Pac* AuxErroneos);
+bool Secretaria(string NombreArchi, Pac* listRecup, int* tamactual);
 
-Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4)
+Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int n)
 {
 	//cambio: preguntas de si los archivos se abrieron correctamente: en main
 
@@ -140,7 +140,6 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4)
 				fp4 >> aux4.telefono >> coma;
 				getline(fp4, aux4.especialidad, ',');
 				fp3 >> aux4.activo >> coma;
-
 				//fp4 >> aux4.firstName >> coma >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
 				//copia la info leida del archivo en el apartado de la lista pacientes
 				l_Pacientes->Cons.MedInCharge = aux4;
@@ -157,6 +156,7 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4)
 			return nullptr;
 	}
 	//cambio: cierro archivos en main? definir
+	n = tamactual;
 	return l_Pacientes;
 }
 
@@ -241,7 +241,7 @@ bool agregarPac(Pac*& l_Pacientes, Pac aux1, int* tamactual)
 
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 {
-	if ((l_Pacientes == nullptr) || tamactual == nullptr)
+	if ((l_Pacientes == nullptr) || tamactual == nullptr || tamactual ==0)
 		return false;
 
 	int i = 0;
@@ -289,13 +289,14 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 						listArchivados[i] = l_Pacientes[i];
 					else
 						listRecup[i] = l_Pacientes[i];
-				}
 
+				}
 				else //ULT CONSULTA - DE 10 AÑOS => RECUPERABLE
 					listRecup[i] = l_Pacientes[i];
 			}
 	}//TODO en el lugar donde debe estar	
 
+	bool checkSecret = Secretaria("Recuperables.csv", listRecup, tamactual);
 	//traspaso de listas a archivo
 	check = EscrituraCsv("Archivados.csv", listArchivados, tamactual);
 	if (check == false)
@@ -305,7 +306,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	if (check == false)
 		AuxErroneos[i] = l_Pacientes[i];//muevo paciente a lista para re-visar los errores de escritura
 
-	check = Secretaria("Erroneos.csv", AuxErroneos);
+	check = Secretaria("Erroneos.csv", AuxErroneos, tamactual);
 	//ERRONEOS se envian todos juntos de una, acá hacia secretaria, SE BORRA MEMORIA LUEGO, debajo de tal instruccion
 	/*funcion secretaria recibe un array de tipo Paciente
 	*en la cual el desarrollo incluiría :
@@ -372,7 +373,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 
 	//ARCHIVO PARA SECRETARIA
 	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
-	if (NombreArchi == "Recuperables.csv")
+	else if (NombreArchi == "Recuperables.csv")
 		/*cambio: cambiar condicion muy inaplicable inflexible
 		* IMPLEMENTAR este procedimiento en otra funcion (crearla)
 		 */
@@ -404,7 +405,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 
 }
 
-bool Secretaria(string NombreArchi, Pac* AuxErroneos)
+bool Secretaria(string NombreArchi, Pac* listRecup, int* tamactual)
 {
 	/*
 	if (AuxErroneos == nullptr)
@@ -434,44 +435,31 @@ bool Secretaria(string NombreArchi, Pac* AuxErroneos)
 	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
 
 	*/
-	/*
+	int i = 0;
 	string respuesta;
-	Pac checkEnssurance
-	bool checkComeBakc = agregarPac(l_Pacientes,aux1,tamactual);
-
-	if (checkComeBakc == true)
+	string checkEnssurance;
+	for(i=0;i <*tamactual; i++)
 	{
-		cout << "Paciente: " << aux1.firstName << aux1.lastName << "Contacto: " << aux1.Cont.celular << endl;
-		cout << "Retornas?";
+		cout << "Escriba si retorna o no: [SI]/[NO]?";
 		cin >> respuesta;
 
 		if (respuesta == "si" || respuesta == "Si" || respuesta == "SI" || respuesta == "sI")
 		{
-			//innecesario
-			//cout << "Vuelve el paciente";
-			//pac.retorno = true;
-
-			cout << "ingrese su obra social";
+			cout << "Vuelve el paciente";
+			
+			cout << "Ingrese su obra social";
 			cin >> checkEnssurance;
-			if (aux1.Cons.enssurance != checkEnssurance)
+			if (listRecup[i].Cons.ensurance != checkEnssurance)
 			{
-				aux1.Cons.enssurance = checkEnssurance	;
+				listRecup[i].Cons.ensurance = checkEnssurance;
 			}
-			//interpretacion?
-			EscrituraCsv("Archivados.csv", l_Pacientes,tamactual);
-			return true;
+			EscrituraCsv("Recuperables.csv", listRecup,tamactual);
 		}
 		else
 		{
-			//innecesario
 			//cout << "No vuelve el paciente";
-			//pac.archivado = "archivado";
-			EscrituraCsv("Archivados.csv", l_Pacientes,tamactual);
-			return false;
+			EscrituraCsv("Archivados.csv", listRecup,tamactual);
 		}
 	}
-	else
-		return false;
-		*/
 	return true;
 }

@@ -19,11 +19,12 @@ namespace foobar::tests
 		fstream fp2;
 		fstream fp3;
 		fstream fp4;
+		int n = 0;
 
 		Pac* expected = nullptr;
 		//Act
 		Pac* actual;
-		actual = Lectura(fp,fp2, fp3, fp4);
+		actual = Lectura(fp,fp2, fp3, fp4,n);
 
 		//Assert
 		EXPECT_NE(expected, actual);
@@ -47,10 +48,10 @@ namespace foobar::tests
 
 		string nombre = "ABRIR.csv";
 
-
+		int n = 0;
 		bool expected;
 
-		bool actual = Secretaria(nombre, listaPac);
+		bool actual = Secretaria(nombre, listaPac,&n);
 
 		EXPECT_TRUE(expected, actual);
 

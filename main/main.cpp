@@ -35,10 +35,10 @@ int main()
 		return -1;
 	if (!(fp4.is_open()))
 		return -1;
-	//archivo.iri base path
+	
 	bool checkFun = true;
-	Lectura(fp, fp2, fp3, fp4);
-	Pac* check = Lectura(fp, fp2, fp3, fp4);
+	int n = 0;
+	Pac* check = Lectura(fp, fp2, fp3, fp4, n);
 	if (check != nullptr)
 		cout << "true";
 
@@ -47,6 +47,12 @@ int main()
 	fp2.close();
 	fp3.close();
 	fp4.close();
+
+	int jose = 10;
+	//llamando a funcion BUSQUEDA con argumentos
+	//check(lista llena de data, N(tamaño de lista asignado en lectura) y DNI de pacientes.csv
+	bool checkBool;
+	checkBool = Busqueda(check, &jose, 10242582);
 
 	//Necesitamos traer al main las info que se obtiene en lectura
 	//checkFun = Busqueda(Pac * &l_Pacientes, int* tamactual, int dni);
