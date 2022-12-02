@@ -1,6 +1,6 @@
 ## >>>>>>>>>>>>>>>
 ## >>>>>>>>>>>>>>>
-add_library(libreria dummy.cpp)
+add_library(libreria MiLibreria.cpp)
 ## <<<<<<<<<<<<<<<
 ## <<<<<<<<<<<<<<<
 
