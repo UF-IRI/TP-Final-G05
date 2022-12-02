@@ -12,10 +12,10 @@ int main()
 	string pathPac, pathCons, pathCont, pathMed;
 	//..\\..\\..\\
 
-	pathPac = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\IRI_Pacientes.csv";
-	pathCons = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\IRI_Consultas.csv";
-	pathCont = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\IRI_Contactos.csv";
-	pathMed = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\IRI_Medicos.csv";
+	pathPac = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\Pacientes.csv";
+	pathCons = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\Consultas.csv";
+	pathCont = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\Contactos.csv";
+	pathMed = "C:\\Users\\54232\\Desktop\\Mateo\\2022\\BMI\\IRI\\TRABAJO FINAL\\data_files\\input\\Medicos.csv";
 
 	fstream fp;
 	fstream fp2;

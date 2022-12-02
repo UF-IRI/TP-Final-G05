@@ -66,11 +66,6 @@ bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 
 Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4)
 {
-	fstream fp; //pacientes
-	fstream fp2;//contactos
-	fstream fp3;//consultas
-	fstream fp4;//medico
-
 	//cambio: preguntas de si los archivos se abrieron correctamente: en main
 
 	Pac* l_Pacientes = new Pac[0];
@@ -479,3 +474,4 @@ bool Secretaria(string NombreArchi, Pac* AuxErroneos)
 		return false;
 		*/
 	return true;
+}
