@@ -49,7 +49,7 @@ struct paciente
 	unsigned int DNI;
 	string firstName, lastName;
 	char gender; //F for female M for male
-	time_t birthDate; //archivo pac tiene formato MM/DD/AA
+	tm* birthDate; //archivo pac tiene formato MM/DD/AA
 	string VitalState; //n/c - internado - fallecido
 	contacto Cont;//variable contacto de tipo contacto
 	consulta Cons; //variable consulta de tipo consulta
@@ -57,14 +57,14 @@ struct paciente
 }; typedef struct paciente Pac;
 
 //invocacion funciones
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactoA, string MedA);
+Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4);
 bool LeerOneByOne(fstream fp, Pac*& aux);
 bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual);
 bool agregarPac(Pac*& l_Pacientes, Pac paciente, int* tamactual);
 bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni);
 bool Secretaria(string NombreArchi, Pac* AuxErroneos);
 
-Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string MedA)
+Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4)
 {
 	fstream fp; //pacientes
 	fstream fp2;//contactos
@@ -83,25 +83,38 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 	string dummy;
 	char coma;
 	int tamactual = 0;
+	char barra = '/';
 
-	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(8)
-	fp2 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Contacto=5)
-	fp3 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Consulta=6)
-	fp4 >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
+	getline(fp, dummy, '\n');
+	getline(fp2, dummy, '\n');
+	getline(fp3, dummy, '\n');
+	getline(fp4, dummy, '\n');
 
 	while (fp)
 	{
 		//cambio: aux.fechas. cambio de struct fecha a time_t 
-		fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
-			aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.VitalState;
+		fp >> aux1.DNI >> coma;
+		getline(fp, aux1.firstName, ',');
+		getline(fp, aux1.lastName, ',');
+		fp >> aux1.gender >> coma;
+		//fp >> aux1.birthDate->tm_mday >> barra >> aux1.birthDate->tm_mon >> barra >> aux1.birthDate->tm_year;
+		getline(fp, aux1.VitalState, ',');
+
+		//fp >> aux1.DNI >> coma >> aux1.firstName >> coma >> aux1.lastName >> coma >> aux1.gender >> coma >>
+			//aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.birthDate >> coma >> aux1.VitalState;
 		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
 		while (fp2)
 		{
 			fp2 >> aux2.DNI;
 			if (aux1.DNI == aux2.DNI)
 			{
+				getline(fp2, aux2.direccion, ',');
+				getline(fp2, aux2.email, ',');
+				fp2 >> aux2.telefono >> coma;
+				fp2 >> aux2.celular >> coma;
+
 				//cambio: antes se leia REPETIDO AGAIN el dni, lo saco xq ya no necesita leerlo denuevo. lo mismo con los de abajo
-				fp2 >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
+				//fp2 >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
 				//copia data de contacto en variable en lista pacientes
 				aux1.Cont = aux2;
 			}
@@ -111,8 +124,14 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 			fp3 >> aux3.DNI >> coma;
 			if (aux1.DNI == aux3.DNI)
 			{
-				fp3 >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
-					aux3.matriculaMed >> coma >> aux3.attendance;
+				fp3 >> aux3.ultConsulta >> coma; //ojo que FECHA
+				fp3 >> aux3.turnoSolicitado >> coma; //ojo que FECHA
+				getline(fp3, aux3.ensurance, ',');
+				fp3 >> aux3.matriculaMed >> coma;
+				fp3 >> aux3.attendance >> coma;
+
+				//fp3 >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
+				//	aux3.matriculaMed >> coma >> aux3.attendance;
 				aux1.Cons = aux3;
 			}
 		}
@@ -121,7 +140,13 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 			fp4 >> aux4.matriculaMed >> coma;
 			if (aux3.matriculaMed == aux4.matriculaMed)
 			{
-				fp4 >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
+				getline(fp4, aux4.firstName, ',');
+				getline(fp4, aux4.lastName, ',');
+				fp4 >> aux4.telefono >> coma;
+				getline(fp4, aux4.especialidad, ',');
+				fp3 >> aux4.activo >> coma;
+
+				//fp4 >> aux4.firstName >> coma >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
 				//copia la info leida del archivo en el apartado de la lista pacientes
 				l_Pacientes->Cons.MedInCharge = aux4;
 			}
@@ -131,7 +156,10 @@ Pac* LecturaCsv(string PacientesA, string ConsultasA, string ContactosA, string 
 		fp3.seekg(fp3.beg);
 		fp4.seekg(fp4.beg);
 
+		bool check = true;
 		agregarPac(l_Pacientes, aux1, &tamactual);
+		if (check == false)
+			return nullptr;
 	}
 	//cambio: cierro archivos en main? definir
 	return l_Pacientes;
@@ -150,10 +178,10 @@ bool LeerOneByOne(fstream fp, Pac*& aux)
 	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Contacto=5)
 	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(Consulta=6)
 	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy; //(MED=5)
-	
+
 	 while (fp)
 	{
-		//cambio: aux.fechas. cambio de struct fecha a time_t 
+		//cambio: aux.fechas. cambio de struct fecha a time_t
 		fp >> aux->DNI >> coma >> aux->firstName >> coma >> aux->lastName >> coma >> aux->gender >> coma >>
 			aux->birthDate >> coma >> aux->birthDate >> coma >> aux->birthDate >> coma >> aux->VitalState;
 		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
@@ -192,7 +220,7 @@ bool LeerOneByOne(fstream fp, Pac*& aux)
 		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
 		fp3.seekg(fp3.beg);
 		fp4.seekg(fp4.beg);
-	*/ 
+	*/
 	return true;
 }
 
@@ -307,7 +335,7 @@ bool Busqueda(Pac*& l_Pacientes, int* tamactual, int dni)
 	return true;
 }
 
-bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)	
+bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 {
 	if ((l_Pacientes == nullptr) || tamactual == nullptr)
 		return false; //AMBAS listas nulas: NADA que hacer
@@ -321,7 +349,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	int i = 0;
 
 	//escribe headers
-	if (NombreArchi == "Archivados.csv") 
+	if (NombreArchi == "Archivados.csv")
 		/*cambio: cambiar condicion muy inaplicable inflexible
 		* IMPLEMENTAR este procedimiento en otra funcion (crearla)
 		 */
@@ -383,6 +411,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 
 bool Secretaria(string NombreArchi, Pac* AuxErroneos)
 {
+	/*
 	if (AuxErroneos == nullptr)
 		return false;
 	/*
@@ -407,7 +436,46 @@ bool Secretaria(string NombreArchi, Pac* AuxErroneos)
 			else
 			cout << "no retorna";
 
-	*/
 	//secretaria ESCRIBE en archivo ROTULO ARCHIVADO
+
+	*/
+	/*
+	string respuesta;
+	Pac checkEnssurance
+	bool checkComeBakc = agregarPac(l_Pacientes,aux1,tamactual);
+
+	if (checkComeBakc == true)
+	{
+		cout << "Paciente: " << aux1.firstName << aux1.lastName << "Contacto: " << aux1.Cont.celular << endl;
+		cout << "Retornas?";
+		cin >> respuesta;
+
+		if (respuesta == "si" || respuesta == "Si" || respuesta == "SI" || respuesta == "sI")
+		{
+			//innecesario
+			//cout << "Vuelve el paciente";
+			//pac.retorno = true;
+
+			cout << "ingrese su obra social";
+			cin >> checkEnssurance;
+			if (aux1.Cons.enssurance != checkEnssurance)
+			{
+				aux1.Cons.enssurance = checkEnssurance	;
+			}
+			//interpretacion?
+			EscrituraCsv("Archivados.csv", l_Pacientes,tamactual);
+			return true;
+		}
+		else
+		{
+			//innecesario
+			//cout << "No vuelve el paciente";
+			//pac.archivado = "archivado";
+			EscrituraCsv("Archivados.csv", l_Pacientes,tamactual);
+			return false;
+		}
+	}
+	else
+		return false;
+		*/
 	return true;
-}

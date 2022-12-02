@@ -7,7 +7,7 @@ using namespace std;
 int main()
 {
 	//cambio: funcion LECTURA llamada en main y apertura
-	
+
 	//PATH Y RUTA DE ARCHIVO	
 	string pathPac, pathCons, pathCont, pathMed;
 	//..\\..\\..\\
@@ -21,6 +21,7 @@ int main()
 	fstream fp2;
 	fstream fp3;
 	fstream fp4;
+
 	fp.open(pathPac, ios::in);
 	fp2.open(pathCons, ios::in);
 	fp3.open(pathCont, ios::in);
@@ -36,7 +37,8 @@ int main()
 		return -1;
 	//archivo.iri base path
 	bool checkFun = true;
-	Pac* check = LecturaCsv(pathPac, pathCons, pathCont, pathMed);
+	Lectura(fp, fp2, fp3, fp4);
+	Pac* check = Lectura(fp, fp2, fp3, fp4);
 	if (check != nullptr)
 		cout << "true";
 
@@ -45,12 +47,12 @@ int main()
 	fp2.close();
 	fp3.close();
 	fp4.close();
-	
+
 	//Necesitamos traer al main las info que se obtiene en lectura
 	//checkFun = Busqueda(Pac * &l_Pacientes, int* tamactual, int dni);
 
 	//cambio: TRAER A MAIN LISTA PACIENTES, desde funciones, por derecha
 	//al traerlas, repartirla para donde deba ir: BUSQUEDA, Secretaria, Escritura(?)
 
-	return 0;	
+	return 0;
 }

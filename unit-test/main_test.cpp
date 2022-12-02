@@ -1,7 +1,7 @@
 #include "gmock/gmock.h"
 #include "MiLibreria.cpp"
 
-namespace foobar::tests 
+namespace foobar::tests
 {
 	TEST(LecturaCsv, lecturaCorrecta)
 	{
@@ -43,11 +43,11 @@ namespace foobar::tests
 		string nombre = "ABRIR.csv";
 
 
-		bool expected = true;
+		bool expected;
 
 		bool actual = Secretaria(nombre, listaPac);
 
-		EXPECT_TRUE(actual);
+		EXPECT_TRUE(expected, actual);
 
 		delete[]listaInt;
 		delete[]listaPac;
@@ -83,5 +83,5 @@ namespace foobar::tests
 		EXPECT_NE(expected, actual);
 		EXPECT_FALSE(actual);
 	}
-		
+
 }
