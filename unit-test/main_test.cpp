@@ -49,11 +49,10 @@ namespace foobar::tests
 		string nombre = "ABRIR.csv";
 
 		int n = 0;
-		bool expected;
 
 		bool actual = Secretaria(nombre, listaPac,&n);
 
-		EXPECT_TRUE(expected, actual);
+		EXPECT_TRUE(actual);
 
 		delete[]listaInt;
 		delete[]listaPac;

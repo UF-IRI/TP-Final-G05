@@ -6,6 +6,18 @@ using namespace std;
 
 int main()
 {
+	//calculamos TIEMPO DE HOY otherway
+	/*time_t current = time(0);
+	time_t timer;
+	double seconds;
+
+	seconds= time(&timer);
+
+	cout << seconds;
+	
+	return 0;
+	*/
+
 	//cambio: funcion LECTURA llamada en main y apertura
 
 	//PATH Y RUTA DE ARCHIVO	
@@ -23,8 +35,8 @@ int main()
 	fstream fp4;
 
 	fp.open(pathPac, ios::in);
-	fp2.open(pathCons, ios::in);
-	fp3.open(pathCont, ios::in);
+	fp2.open(pathCont, ios::in);
+	fp3.open(pathCons, ios::in);
 	fp4.open(pathMed, ios::in);
 
 	if (!(fp.is_open()))
@@ -36,7 +48,6 @@ int main()
 	if (!(fp4.is_open()))
 		return -1;
 	
-	bool checkFun = true;
 	int n = 0;
 	Pac* check = Lectura(fp, fp2, fp3, fp4, n);
 	if (check != nullptr)

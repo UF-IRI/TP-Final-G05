@@ -1,4 +1,63 @@
 /*
+* 
+* time_t convertDateToTimeT(string dato)
+{
+	int i = 0;
+	int day, month, year;
+	int cont = 0;
+	string auxD{};
+	string auxM{};
+	string auxY{};
+	string aux;
+	int cont2 = 0;
+	while (i < (dato.length() - 1))
+	{
+
+		while (dato[i] != '/')
+		{
+
+			if (cont == 0)
+			{
+				aux = dato[i];
+				auxD += aux;
+			}
+			else if (cont == 1)
+			{
+				aux = dato[i];
+				auxM += aux;
+			}
+			else
+			{
+				if (cont2 >= 4)
+					break;
+				aux = dato[i];
+				auxY += aux;
+				cont2++;
+			}
+
+			i++;
+
+		}
+		cont++;
+		i++;
+	}
+
+
+	day = stoi(auxD);
+	month = stoi(auxM);
+	year = stoi(auxY);
+
+
+	tm date{};
+	date.tm_year = year - 1900;
+	date.tm_mon = month - 1;
+	date.tm_mday = day;
+
+	time_t finalDate = mktime(&date);
+	return finalDate;
+}
+//le doy una string y me la devuelve en time_t
+
 void secretary(string SecretaryFileName, int sizeFile) //falta lo de escribir una nuesva consulta en el array de consultas
 {//basicamente para secretaria abren por separado todas las listas para guardarse la data q fueron recopilando de los oarchivos originales
 	//ahora bien cuando poseen esa data hacen for y con random generan las respuestas de los pacientes
