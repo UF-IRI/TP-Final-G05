@@ -48,6 +48,9 @@ int main()
 	if (!(fp4.is_open()))
 		return -1;
 	
+	//traemos al main por derecha la info que se obtiene en lectura. 
+	//al traerla, repartirla donde requerida : BUSQUEDA, Secretaria, Escritura(?)
+	//Pac * &listaDePacientes, int* tamactual
 	int n = 0;
 	Pac* check = Lectura(fp, fp2, fp3, fp4, n);
 	if (check != nullptr)
@@ -59,17 +62,14 @@ int main()
 	fp3.close();
 	fp4.close();
 
-	int jose = 10;
 	//llamando a funcion BUSQUEDA con argumentos
-	//check(lista llena de data, N(tamaño de lista asignado en lectura) y DNI de pacientes.csv
+	//check(lista con Data, N(tamaño de lista asignado en lectura) y DNI  x de pacientes.csv
 	bool checkBool;
-	checkBool = Busqueda(check, &jose, 10242582);
-
-	//Necesitamos traer al main las info que se obtiene en lectura
-	//checkFun = Busqueda(Pac * &l_Pacientes, int* tamactual, int dni);
-
-	//cambio: TRAER A MAIN LISTA PACIENTES, desde funciones, por derecha
-	//al traerlas, repartirla para donde deba ir: BUSQUEDA, Secretaria, Escritura(?)
-
+	checkBool = Busqueda(check, &n, 10242582);
+	if (checkBool == true)
+		cout << "Encontre al paciente";
+	else
+		cout << "No encontre al paciente";
+	//dentro de BUSQUEDA, ocurre SECRETARIA, y así tambien, ESCRITURA, respectivamente
 	return 0;
 }
