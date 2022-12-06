@@ -54,7 +54,7 @@ int main()
 	int n = 0;
 	Pac* check = Lectura(fp, fp2, fp3, fp4, n);
 	if (check != nullptr)
-		cout << "true";
+		cout << "true" << endl;
 
 	//cambio: los saco dentro de la fx
 	fp.close();

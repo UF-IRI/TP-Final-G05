@@ -105,6 +105,7 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int &n)
 		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
 		while (fp2)
 		{
+			//readCont(fp2, l_Pacientes,&tamactual);
 			fp2 >> aux2.DNI >> coma;
 			fp2 >> aux2.telefono >> coma;
 			fp2 >> aux2.celular >> coma;
@@ -122,6 +123,7 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int &n)
 		}
 		while (fp3)
 		{
+			//readCont(fp3, l_Pacientes,&tamactual);
 			fp3 >> aux3.DNI >> coma;
 			getline(fp3, aux3.ultConsulta, ',');//ojo que FECHA
 			getline(fp3, aux3.turnoSolicitado, ',');//ojo que FECHA
@@ -137,6 +139,7 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int &n)
 		}
 		while (fp4)
 		{
+			//readCont(fp4, l_Pacientes,&tamactual);
 			fp4 >> aux4.matriculaMed >> coma;
 			getline(fp4, aux4.firstName, ',');
 			getline(fp4, aux4.lastName, ',');
@@ -163,66 +166,62 @@ Pac* Lectura(fstream& fp, fstream& fp2, fstream& fp3, fstream& fp4, int &n)
 	return l_Pacientes;	
 }
 
-bool readCont(fstream &fp, Pac*& aux, int *tamactual)
+bool readCont(fstream &fp2, Pac*& aux, int *tamactual)
 {
-	/*cambio
-	Pac aux1;
-
+	Cont auxCont;
 	string dummy;
-	char coma;
+	//lee header
+	getline(fp2, dummy, ',');
 
-	getline(fp, dummy, '\n');
-
-	 while (fp)
+	while (fp2)
 	{
-		fp >> aux->DNI >> coma >> aux->firstName >> coma >> aux->lastName >> coma >> aux->gender >> coma >>
-			aux->birthDate >> coma >> aux->birthDate >> coma >> aux->birthDate >> coma >> aux->VitalState;
-		//recorre con cursor leyendo archivo paciente y guarda en struct paciente
-		while (fp2)
-		{
-			fp2 >> aux.Cont.DNI;
-			if (aux.DNI == aux2.Cont.DNI)
-			{
-				//cambio: antes se leia REPETIDO AGAIN el dni, lo saco xq ya no necesita leerlo denuevo. lo mismo con los de abajo
-				fp2 >> aux2.direccion >> coma >> aux2.email >> coma >> aux2.telefono >> coma >> aux2.celular;
-				//copia data de contacto en variable en lista pacientes
-				aux1.Cont = aux2;
-			}
-		}
-		while (fp3)
-		{
-			fp3 >> aux3.DNI >> coma;
-			if (aux1.DNI == aux3.DNI)
-			{
-				fp3 >> aux3.ultConsulta >> coma >> aux3.turnoSolicitado >> coma >> aux3.ensurance >> coma >>
-					aux3.matriculaMed >> coma >> aux3.attendance;
-				aux1.Cons = aux3;
-			}
-		}
-		while (fp4)
-		{
-			fp4 >> aux4.matriculaMed >> coma;
-			if (aux3.matriculaMed == aux4.matriculaMed)
-			{
-				fp4 >> aux4.lastName >> coma >> aux4.telefono >> coma >> aux4.especialidad >> coma >> aux4.activo;
-				//copia la info leida del archivo en el apartado de la lista pacientes
-				l_Pacientes->Cons.MedInCharge = aux4;
-			}
-		}
-
-		fp2.seekg(fp2.beg);//sale del while fp2? vuelve al principio
-		fp3.seekg(fp3.beg);
-		fp4.seekg(fp4.beg);
-	*/
+		fp2 >> auxCont.telefono >> dummy;
+		fp2 >> auxCont.celular >> dummy;
+		getline(fp2, auxCont.direccion, ',');
+		getline(fp2, auxCont.email, '\n');
+		//agregarPac(aux, auxCont, tamactual); //argumento del medio debe ser tipo Pac
+		//condicion en while de si es igual se asigna a l_Pacientes
+	}
 	return true;
 }
-bool readCons(fstream& fp, Pac*& aux, int* tamactual)
+bool readCons(fstream& fp3, Pac*& aux, int* tamactual)
 {
+	Cons auxCons;
+	string dummy;
+	//lee header
+	getline(fp3, dummy, ',');
 
+	while (fp3)
+	{
+		fp3 >> auxCons.DNI >> dummy;
+		getline(fp3, auxCons.ultConsulta, ',');//ojo que FECHA
+		getline(fp3, auxCons.turnoSolicitado, ',');//ojo que FECHA
+		fp3 >> auxCons.attendance >> dummy;
+		getline(fp3, auxCons.matriculaMed, '\n');
+		//agregarPac(aux, auxCons, tamactual); //argumento del medio debe ser tipo Pac
+		//condicion en while de si es igual se asigna a l_Pacientes
+	}
 	return true;
 }
-bool readMed(fstream& fp, Pac*& aux, int* tamactual)
+bool readMed(fstream& fp4, Pac*& aux, int* tamactual)
 {
+	Med auxMed;
+	string dummy;
+	//lee header
+	getline(fp4, dummy, ',');
+
+	while (fp4)
+	{
+		getline(fp4, auxMed.matriculaMed, ',');
+		fp4 >> auxMed.matriculaMed >> dummy;
+		getline(fp4, auxMed.firstName, ',');//ojo que FECHA
+		getline(fp4, auxMed.lastName, ',');//ojo que FECHA
+		getline(fp4, auxMed.telefono, ',');
+		getline(fp4, auxMed.especialidad, '\n');
+		fp4 >> auxMed.activo;
+		//agregarPac(aux, auxMed, tamactual); //argumento segundo debe ser tipo Pac
+		//condicion en while de si es igual se asigna a l_Pacientes
+	}
 	return true;
 }
 
@@ -413,6 +412,7 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 
 	int i = 0;
 
+	//for(i=0;i<*tamactual;i++) PARA AMBOS if como alternativa
 	/*cambio: cambiar condicion muy inaplicable inflexible
 	* IMPLEMENTAR este procedimiento en otra funcion (crearla)
 	 */
@@ -420,32 +420,32 @@ bool EscrituraCsv(string NombreArchi, Pac*& l_Pacientes, int* tamactual)
 	if (NombreArchi == "Archivados.csv")
 	{
 		//cambio: eliminamos bucle xq pacientes entran de a uno. y ENDL no permite que se sobreescriba
-		//escribo headers
+			//escribo headers
 		OutDataFP << "ARCHIVADOS" << endl;
-		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL";
-		OutDataFP << "," << "DIRECCION" << "," << "EMAIL" << "," << "TELEFONO" << "," << "CELULAR";
-		OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL 1" << "," << "OBRA SOCIAL2" << "," << "PRESENTISMO" << endl;
-		
+		OutDataFP << "DNI" << "," << "NOMBRE" << "," << "APELLIDO" << "," << "GENERO" << "," << "FECHA" << "," << "ESTADO VITAL" << "," << "OBRA SOCIAL" << endl;
+		OutDataFP << "," << "TELEFONO" << "," << "CELULAR" << "," << "DIRECCION" << "," << "EMAIL" << endl;
+		OutDataFP << "," << "ULTIMA CONSULTA" << "," << "TURNO SOLICITADO" << "," << "OBRA SOCIAL " << "," << "ASISTENCIA" << endl;
+		for (i = 0; i < *tamactual; i++) //tamaactual por tam de irrecup
+		{
 			OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].firstName << "," << l_Pacientes[i].lastName << "," << l_Pacientes[i].gender
 				<< "," << l_Pacientes[i].birthDate << "," << l_Pacientes[i].VitalState << "," << l_Pacientes[i].insurance << "," << endl;
-			OutDataFP << l_Pacientes[i].DNI << "," << l_Pacientes[i].Cont.telefono << "," << l_Pacientes[i].Cont.celular << "," << 
+			OutDataFP /* << l_Pacientes[i].DNI << ","*/ <<  l_Pacientes[i].Cont.telefono << "," << l_Pacientes[i].Cont.celular << "," <<
 				l_Pacientes[i].Cont.direccion << "," << l_Pacientes[i].Cont.email << "," << endl;
-			OutDataFP << l_Pacientes[i].Cons.ultConsulta << "/" << l_Pacientes[i].Cons.turnoSolicitado << "," << 
+			OutDataFP << l_Pacientes[i].Cons.ultConsulta << "," << l_Pacientes[i].Cons.turnoSolicitado << "," <<
 				l_Pacientes[i].Cons.matriculaMed << "," << l_Pacientes[i].Cons.attendance << endl;
-
+		}
 	}
-
-	//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
-	else if (NombreArchi == "Recuperables.csv")
+	else if (NombreArchi == "Recuperables.csv") 
 	{
-		//escribe headers
-		OutDataFP << "DNI(...)";
-	
+		for (i = 0; i < *tamactual; i++) //tamaactual por tam de irrecup
+		{	//escribe headers
+			OutDataFP << "DNI(...)";
+			//requiere: DATOS MEDICO (l_Contactos.MedInCharge...) + (l_Pacientes.(nombre,apellido,telefono)
 			OutDataFP << l_Pacientes->firstName << "," << l_Pacientes->lastName << "," << l_Pacientes->Cont.celular << endl;
 			OutDataFP << l_Pacientes[i].Cons.MedInCharge.matriculaMed << "," << l_Pacientes[i].Cons.MedInCharge.firstName << "," <<
 				l_Pacientes[i].Cons.MedInCharge.lastName << "," << l_Pacientes[i].Cons.MedInCharge.especialidad << "," <<
 				l_Pacientes[i].Cons.MedInCharge.activo << "," << l_Pacientes[i].Cons.MedInCharge.telefono << endl;
-
+		}
 	}
 	return true;
 }
@@ -485,7 +485,9 @@ bool Secretaria(string NombreArchi, Pac* listRecup, int* tamactual)
 	int i = 0;
 	string respuesta;
 	string checkEnssurance;
-	for(i=0;i <1; i++) //cambio: 1 por *tamactual
+	Pac* UltimatelyRecup = new Pac[*tamactual];
+	Pac* UltimatelyIrrecup = new Pac[*tamactual];
+	for(i=0;i < *tamactual; i++) //cambio: *tamactual por tamaño listRecup debería ser
 	{
 		cout << "Escriba si retorna o no: [SI]/[NO]?" << endl;
 		cin >> respuesta;
@@ -500,14 +502,15 @@ bool Secretaria(string NombreArchi, Pac* listRecup, int* tamactual)
 			{
 				listRecup[i].insurance = checkEnssurance;
 			}
-			EscrituraCsv("Recuperables.csv", listRecup,tamactual);
+			UltimatelyRecup[i] = listRecup[i];
+			EscrituraCsv("Recuperables.csv", UltimatelyRecup,tamactual);
 		}
 		else
 		{
 			cout << "No vuelve el paciente" << endl;
-			EscrituraCsv("Archivados.csv", listRecup,tamactual);
+			UltimatelyIrrecup[i] = listRecup[i];
+			EscrituraCsv("Archivados.csv", UltimatelyIrrecup,tamactual);
 		}
-		break;
 	}
 	return true;
 }
