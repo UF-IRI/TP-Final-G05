@@ -69,7 +69,7 @@ int main()
 	if (checkBool == true)
 		cout << "Encontre al paciente";
 	else
-		cout << "No encontre al paciente";
+		cout << "Error 404: No encontre al paciente";
 	//dentro de BUSQUEDA, ocurre SECRETARIA, y así tambien, ESCRITURA, respectivamente
 	return 0;
 }
